@@ -2,6 +2,13 @@
 
 บันทึกการเปลี่ยนแปลงของ Speexx Helper
 
+## [1.0.2] - 2026-09-13
+
+### Added
+
+- Privacy Policy สำหรับการเปิดโครงการเป็น Public
+- GitHub Issue template สำหรับรายงานปัญหาและแนบ Debug Report
+
 ## [1.0.1] - 2026-09-13
 
 ### Added
