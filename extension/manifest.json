@@ -1,0 +1,33 @@
+{
+  "manifest_version": 3,
+  "name": "Speexx Helper",
+  "version": "1.0.0",
+  "description": "ช่วยทำแบบฝึกหัดใน Speexx Portal อัตโนมัติ",
+  "icons": {
+    "16": "icons/graduation-cap.png",
+    "32": "icons/graduation-cap.png",
+    "48": "icons/graduation-cap.png",
+    "128": "icons/graduation-cap.png"
+  },
+  "permissions": ["storage", "activeTab", "scripting"],
+  "host_permissions": ["https://portal.speexx.com/*"],
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icons/graduation-cap.png",
+      "32": "icons/graduation-cap.png",
+      "48": "icons/graduation-cap.png",
+      "128": "icons/graduation-cap.png"
+    }
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://portal.speexx.com/*"],
+      "js": ["content.js"],
+      "css": ["content.css"]
+    }
+  ],
+  "background": {
+    "service_worker": "background.js"
+  }
+}

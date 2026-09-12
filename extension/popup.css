@@ -1,0 +1,55 @@
+:root { color-scheme: dark; font-family: "Segoe UI", system-ui, sans-serif; }
+* { box-sizing: border-box; }
+body { width: 380px; margin: 0; background: #0b1220; color: #f8fafc; }
+.popup-container { padding: 12px; background: radial-gradient(circle at 100% 0, #26345a 0, #0b1220 48%); }
+.app-header { display: flex; align-items: center; justify-content: space-between; padding: 2px 2px 11px; }
+.brand { display: flex; align-items: center; gap: 8px; }
+.brand-mark { width: 25px; height: 25px; object-fit: contain; }
+.app-header strong { display: block; font-size: 17px; letter-spacing: -.2px; }
+.subtle { display: block; margin-top: 1px; color: #93a4c2; font-size: 10px; }
+.theme-toggle-btn { width: 32px; height: 32px; border: 1px solid #35415f; border-radius: 10px; background: #1d2a43; color: inherit; cursor: pointer; font-size: 15px; }
+.card { padding: 14px; border: 1px solid #2b3955; border-radius: 15px; background: rgba(27,39,62,.96); box-shadow: 0 14px 35px rgba(0,0,0,.22); }
+.section-heading { display: flex; gap: 9px; align-items: center; margin-bottom: 13px; }
+.section-icon { display: grid; place-items: center; width: 30px; height: 30px; border-radius: 9px; background: #2e3c62; }
+h2 { margin: 0; font-size: 15px; }
+.section-heading p { margin: 2px 0 0; color: #91a1bd; font-size: 10px; }
+.section-label { margin: 12px 0 6px; color: #d6e0f2; font-size: 11px; font-weight: 700; }
+label { font-size: 11px; color: #c4d0e5; font-weight: 600; }
+.speed-control { display: flex; align-items: center; gap: 8px; margin: 6px 0 12px; }
+.speed-control input { accent-color: #8b7cf6; flex: 1; }
+.speed-control output { min-width: 18px; color: #fff; font-size: 12px; font-weight: 800; text-align: center; }
+.speed-control span, .number-control span { color: #91a1bd; font-size: 10px; white-space: nowrap; }
+.profile-buttons { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.profile-btn { min-height: 32px; border: 1px solid #43516d; border-radius: 8px; background: #111a2c; color: #c4d0e5; cursor: pointer; font-size: 11px; font-weight: 700; }
+.profile-btn:hover, .profile-btn[aria-pressed="true"] { border-color: #8b7cf6; background: #40387d; color: #fff; }
+.profile-btn[aria-pressed="true"] { box-shadow: 0 0 0 2px rgba(139,124,246,.18); }
+/* กลุ่มจับเวลาแบบ 2 ช่องในบรรทัดเดียว เพื่อให้หน้าต่างไม่สูงเกินไป */
+.repeat-settings { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.setting-field { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+.number-control { display: flex; align-items: center; gap: 6px; min-width: 0; }
+.setting-field input { width: 100%; min-width: 0; height: 35px; padding: 7px 9px; border: 1px solid #43516d; border-radius: 8px; background: #111a2c; color: #fff; font-size: 13px; outline: none; }
+.setting-field input:focus { border-color: #8b7cf6; box-shadow: 0 0 0 3px rgba(139,124,246,.16); }
+/* โหมดต่อเนื่อง: สวิตช์อยู่ซ้ายและระยะเวลาทบทวนอยู่ขวาในแถวเดียว */
+.continuous-settings { display: grid; grid-template-columns: 1fr 104px; gap: 8px; align-items: end; }
+.toggle-setting { display: flex; align-items: center; gap: 7px; height: 35px; padding: 0 9px; border: 1px solid #43516d; border-radius: 8px; background: #111a2c; cursor: pointer; }
+.toggle-setting input { width: 15px; height: 15px; margin: 0; accent-color: #8b7cf6; }
+.toggle-setting span { color: #d8e1f0; font-size: 10px; font-weight: 600; }
+.continuous-review-field input:disabled { opacity: .5; cursor: not-allowed; }
+.setting-hint { margin: 7px 0 12px; color: #8292ae; font-size: 10px; line-height: 1.25; }
+/* แถบปุ่มท้ายหน้าต่าง: รักษาขนาดปุ่มให้กดง่ายแต่ประหยัดพื้นที่ */
+.action-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.btn { min-height: 39px; border: 0; border-radius: 9px; color: #fff; cursor: pointer; font-weight: 700; font-size: 11px; transition: transform .15s, filter .15s; }
+.btn:hover:not(:disabled) { filter: brightness(1.1); transform: translateY(-1px); }
+.btn:disabled { cursor: not-allowed; opacity: .45; }
+.btn-primary { background: linear-gradient(135deg,#6674f6,#4f46e5); box-shadow: 0 6px 15px rgba(79,70,229,.24); }
+.btn-secondary { background: #2c3a56; }
+/* ปุ่มรีเซ็ต: แยกจากปุ่มเริ่มงาน เพื่อลดโอกาสกดโดยไม่ตั้งใจ */
+.reset-btn { width:100%; margin-top:7px; padding:4px; border:0; background:transparent; color:#94a3b8; cursor:pointer; font:inherit; font-size:10px; }
+.reset-btn:hover { color:#c4b5fd; text-decoration:underline; }
+.status { min-height: 14px; margin: 9px 0 0; color: #8fa0bb; font-size: 10px; }
+.status.success { color: #6ee7b7; }.status.error { color: #fca5a5; }.status.info { color: #93c5fd; }
+/* เครดิตผู้จัดทำ: ตั้งใจให้เล็กและอยู่ท้ายหน้าต่างโดยไม่แย่งความสำคัญจากปุ่ม */
+.credits { margin: 5px 0 0; color: #64748b; font-size: 9px; text-align: center; }
+body[data-theme="light"] { color-scheme: light; background: #eef2ff; color: #172033; }
+body[data-theme="light"] .card { background: #fff; border-color: #d9e0ef; }
+body[data-theme="light"] .setting-field input, body[data-theme="light"] .toggle-setting, body[data-theme="light"] .profile-btn { background: #f7f9fc; color: #172033; border-color: #cbd5e1; }

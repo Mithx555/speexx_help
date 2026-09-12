@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Speexx Helper</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+
+<body>
+  <main class="popup-container">
+    <header class="app-header">
+      <div class="brand"><img class="brand-mark" src="icons/graduation-cap.png" alt="" aria-hidden="true">
+        <div><strong>Speexx Helper</strong><span class="subtle">ผู้ช่วยทำแบบฝึกหัด</span></div>
+      </div>
+      <button id="themeToggleBtn" class="theme-toggle-btn" title="สลับธีม">🌙</button>
+    </header>
+    <section class="card">
+      <div class="section-heading"><span class="section-icon">⚙️</span>
+        <div>
+          <h2>ตั้งค่าการทำงาน</h2>
+          <p>ปรับเวลาให้เหมาะกับของคุณ</p>
+        </div>
+      </div>
+      <!-- เวลาเป้าหมายต่อข้อ: แก้ช่วง min/max หรือข้อความหน่วยได้ที่ส่วนนี้ -->
+      <label for="speedSlider">เวลาทำแต่ละข้อ</label>
+      <div class="speed-control">
+        <input type="range" id="speedSlider" min="1" max="120" value="5">
+        <output id="speedValue" for="speedSlider">5</output><span>นาที/ข้อ</span>
+      </div>
+      <!-- โปรไฟล์เวลา: ปุ่มเหล่านี้เชื่อมกับ timeProfiles ใน popup.js -->
+      <div class="section-label">โปรไฟล์เวลา</div>
+      <div class="profile-buttons" role="group" aria-label="เลือกโปรไฟล์เวลา">
+        <button type="button" class="profile-btn" data-profile="slow">ช้า</button>
+        <button type="button" class="profile-btn" data-profile="normal">ปกติ</button>
+        <button type="button" class="profile-btn" data-profile="detailed">ละเอียด</button>
+      </div>
+      <!-- ตั้งค่าสำหรับปุ่ม “ทำทั้งหมดแบบจับเวลา” บนแผงลอย -->
+      <div class="section-label">⏱ ทำทั้งหมดแบบจับเวลา</div>
+      <div class="repeat-settings">
+        <div class="setting-field"><label for="reviewMinutes">ทบทวนก่อน Next</label>
+          <div class="number-control"><input id="reviewMinutes" type="number" min="1" max="120"
+              value="2"><span>นาที</span></div>
+        </div>
+        <div class="setting-field"><label for="reminderMinutes">เตือนก่อนหมดเวลา</label>
+          <div class="number-control"><input id="reminderMinutes" type="number" min="1" max="30"
+              value="1"><span>นาที</span></div>
+        </div>
+      </div>
+      <!-- ตั้งค่าสำหรับปุ่ม “ทำอัตโนมัติต่อเนื่อง”; เวลานี้ใช้หลังจบแต่ละข้อ -->
+      <div class="section-label">🔁 โหมดต่อเนื่อง</div>
+      <div class="continuous-settings">
+        <label class="toggle-setting" for="manualReviewBeforeContinue">
+          <input id="manualReviewBeforeContinue" type="checkbox" checked>
+          <span>ทบทวนหลังแต่ละข้อ</span>
+        </label>
+        <div class="setting-field continuous-review-field"><label for="continuousReviewMinutes">ทบทวน</label>
+          <div class="number-control"><input id="continuousReviewMinutes" type="number" min="1" max="120"
+              value="5"><span>นาที</span></div>
+        </div>
+      </div>
+      <p class="setting-hint">ครบเวลาแล้ว ระบบจะเปิดข้อถัดไปเอง</p>
+      <!-- ปุ่มดำเนินการและข้อความสถานะด้านล่างของหน้าต่าง -->
+      <div class="action-buttons">
+        <button id="saveBtn" class="btn btn-secondary">บันทึกตั้งค่า</button>
+        <button id="autoBtn" class="btn btn-primary" disabled>เริ่มทำปกติ</button>
+      </div>
+      <!-- รีเซ็ตเฉพาะค่าการทำงาน ไม่กระทบธีมและสถิติเซสชัน -->
+      <button id="resetBtn" class="reset-btn" type="button">↺ รีเซ็ตการตั้งค่าเป็นค่าเริ่มต้น</button>
+      <p id="status" class="status" aria-live="polite">เปิดหน้า Speexx Portal เพื่อเริ่มใช้งาน</p>
+      <!-- เครดิตผู้จัดทำ -->
+      <p class="credits">By Mithx · By บักโอม</p>
+    </section>
+  </main>
+  <script src="popup.js"></script>
+</body>
+
+</html>

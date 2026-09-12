@@ -1,0 +1,471 @@
+/* Speexx Helper - Content Script Styles (Panel ลอย) */
+
+/* ===========================
+   Root container
+   =========================== */
+#speexx-helper-panel,
+#speexx-helper-panel * {
+  box-sizing: border-box;
+  font-family: 'Plus Jakarta Sans', 'Sarabun', 'Segoe UI', system-ui, sans-serif;
+}
+
+#speexx-helper-main {
+  position: fixed !important;
+  top: 10px;
+  right: 10px;
+  width: 350px;
+  max-width: calc(100vw - 20px);
+  max-height: 80vh;
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  border-radius: 16px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.05);
+  z-index: 999999;
+  color: #f8fafc;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  flex-direction: column;
+}
+
+/* ===========================
+   Header
+   =========================== */
+#speexx-helper-header {
+  padding: 13px 14px;
+  background: linear-gradient(90deg, #6366f1 0%, #8b5cf6 100%);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: move;
+  user-select: none;
+  flex-shrink: 0;
+}
+
+#speexx-helper-header .sh-title {
+  font-weight: 700;
+  font-size: 14px;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+#speexx-helper-header .sh-brand-icon {
+  width: 17px;
+  height: 17px;
+  object-fit: contain;
+}
+
+#speexx-helper-header .sh-heading {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+#speexx-helper-status {
+  max-width: 190px;
+  overflow: hidden;
+  color: rgba(255,255,255,.78);
+  font-size: 10px;
+  font-weight: 500;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+#speexx-helper-status[data-type="success"] { color: #bbf7d0; }
+#speexx-helper-status[data-type="error"] { color: #fecaca; }
+#speexx-helper-status[data-type="warning"] { color: #fde68a; }
+
+#speexx-helper-timer {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  margin-top: 3px;
+  padding: 2px 6px;
+  border-radius: 5px;
+  background: rgba(15, 23, 42, .32);
+  color: #bfdbfe;
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+}
+
+#speexx-helper-header .sh-controls {
+  display: flex;
+  gap: 4px;
+}
+
+#speexx-helper-minimize,
+#speexx-helper-toggle-debug,
+#speexx-helper-close {
+  cursor: pointer;
+  font-size: 14px;
+  width: 26px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  opacity: 0.85;
+  transition: all 0.15s ease;
+  background: transparent;
+  border: none;
+  color: #fff;
+  font-family: inherit;
+}
+
+#speexx-helper-minimize:hover,
+#speexx-helper-toggle-debug:hover,
+#speexx-helper-close:hover {
+  background: rgba(255, 255, 255, 0.2);
+  opacity: 1;
+}
+
+#speexx-helper-close:hover {
+  background: rgba(239, 68, 68, 0.6);
+}
+
+/* ===========================
+   Content area
+   =========================== */
+#speexx-helper-content {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  flex: 1;
+}
+
+.sh-status-card {
+  margin: 10px 11px 0;
+  padding: 10px 11px;
+  border: 1px solid rgba(129,140,248,.28);
+  border-radius: 10px;
+  background: linear-gradient(135deg, rgba(99,102,241,.18), rgba(30,41,59,.4));
+}
+
+.sh-status-card-top, .sh-debug-heading { display:flex; justify-content:space-between; gap:8px; }
+.sh-status-label { color:#c7d2fe; font-size:10px; font-weight:700; }
+#speexx-helper-progress { color:#94a3b8; font-size:10px; white-space:nowrap; }
+.sh-current { margin-top:5px; color:#f8fafc; font-size:11px; line-height:1.35; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+/* แถบสรุปเซสชัน: จำนวนข้อ, เวลารวม และจำนวนครั้งทบทวน */
+.sh-session-summary { display:flex; align-items:center; gap:7px; margin:8px 11px 0; padding:7px 10px; border:1px solid rgba(148,163,184,.18); border-radius:9px; background:rgba(15,23,42,.32); color:#cbd5e1; font-size:10px; font-variant-numeric:tabular-nums; }
+.sh-session-title { margin-right:auto; color:#94a3b8; font-weight:700; }
+.sh-debug-heading { align-items:center; margin:11px 12px 0; color:#94a3b8; font-size:10px; }
+/* ปุ่มส่งออก Debug: อยู่กับหัวข้อรายละเอียดเพื่อหาเจอได้ทันที */
+#speexx-helper-export-debug { padding:3px 6px; border:1px solid rgba(129,140,248,.35); border-radius:6px; background:rgba(99,102,241,.14); color:#c7d2fe; cursor:pointer; font:inherit; font-size:10px; }
+#speexx-helper-export-debug:hover { background:rgba(99,102,241,.28); color:#fff; }
+
+/* ===========================
+   Log container
+   =========================== */
+#speexx-helper-log {
+  padding: 7px 11px 10px;
+  max-height: 28vh;
+  overflow-y: auto;
+  font-size: 12px;
+  line-height: 1.4;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(99, 102, 241, 0.5) transparent;
+}
+
+#speexx-helper-log::-webkit-scrollbar {
+  width: 6px;
+}
+
+#speexx-helper-log::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+#speexx-helper-log::-webkit-scrollbar-thumb {
+  background: rgba(99, 102, 241, 0.5);
+  border-radius: 999px;
+}
+
+#speexx-helper-log::-webkit-scrollbar-thumb:hover {
+  background: rgba(99, 102, 241, 0.8);
+}
+
+/* Empty state placeholder */
+#speexx-helper-log .sh-empty {
+  color: #64748b;
+  text-align: center;
+  padding: 16px 10px;
+  font-size: 12px;
+}
+
+/* ===========================
+   Log entries
+   =========================== */
+#speexx-helper-log .sh-log-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  padding: 6px 9px;
+  margin: 4px 0;
+  background: rgba(255, 255, 255, 0.055);
+  border-radius: 8px;
+  border-left: 3px solid transparent;
+  font-size: 11px;
+  line-height: 1.4;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
+
+#speexx-helper-log .sh-log-icon {
+  flex-shrink: 0;
+  font-size: 11px;
+  line-height: 1.5;
+  width: 14px;
+  text-align: center;
+}
+
+#speexx-helper-log .sh-log-text {
+  flex: 1;
+  color: #e2e8f0;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+
+/* Log type colors (left border + icon) */
+#speexx-helper-log .sh-log-row[data-type="info"]    { border-left-color: #38bdf8; }
+#speexx-helper-log .sh-log-row[data-type="info"] .sh-log-icon    { color: #38bdf8; }
+
+#speexx-helper-log .sh-log-row[data-type="success"] { border-left-color: #34d399; }
+#speexx-helper-log .sh-log-row[data-type="success"] .sh-log-icon { color: #34d399; }
+
+#speexx-helper-log .sh-log-row[data-type="error"]   { border-left-color: #f87171; }
+#speexx-helper-log .sh-log-row[data-type="error"] .sh-log-icon   { color: #f87171; }
+
+#speexx-helper-log .sh-log-row[data-type="warning"] { border-left-color: #fbbf24; }
+#speexx-helper-log .sh-log-row[data-type="warning"] .sh-log-icon { color: #fbbf24; }
+
+#speexx-helper-log .sh-log-row[data-type="answer"]  { border-left-color: #818cf8; }
+#speexx-helper-log .sh-log-row[data-type="answer"] .sh-log-icon  { color: #818cf8; }
+
+#speexx-helper-log .sh-log-row[data-type="step"]    { border-left-color: #06b6d4; }
+#speexx-helper-log .sh-log-row[data-type="step"] .sh-log-icon    { color: #06b6d4; }
+
+/* ===========================
+   Buttons footer
+   =========================== */
+#speexx-helper-buttons {
+  padding: 11px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+#speexx-helper-buttons button {
+  min-height: 38px;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 10px;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 12.5px;
+  font-family: inherit;
+  transition: opacity 0.2s, transform 0.2s, box-shadow 0.2s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+#speexx-helper-buttons button:hover:not(:disabled) {
+  opacity: 0.92;
+  transform: translateY(-1px);
+}
+
+#speexx-helper-buttons button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.sh-confirm {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: grid;
+  place-items: end center;
+  padding: 12px;
+  background: rgba(2, 6, 23, .62);
+  backdrop-filter: blur(3px);
+}
+
+.sh-confirm[hidden] { display: none; }
+.sh-confirm-card {
+  width: 100%;
+  padding: 14px;
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 12px;
+  background: #1e293b;
+  box-shadow: 0 12px 30px rgba(0,0,0,.35);
+}
+.sh-confirm-card strong { display:block; font-size:13px; color:#f8fafc; }
+.sh-confirm-card p { margin:5px 0 12px; color:#94a3b8; font-size:11px; }
+.sh-confirm-actions { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+.sh-confirm-actions button { min-height:36px; border:0; border-radius:8px; color:#fff; font-weight:700; cursor:pointer; }
+#speexx-helper-keep-running { background:#334155; }
+#speexx-helper-confirm-stop { background:linear-gradient(90deg,#ef4444,#dc2626); }
+
+#speexx-helper-solve-all {
+  flex: 1;
+  background: linear-gradient(90deg, #6366f1 0%, #8b5cf6 100%);
+  box-shadow: 0 2px 10px rgba(99, 102, 241, 0.3);
+}
+
+#speexx-helper-solve-one {
+  flex: 1;
+  background: linear-gradient(90deg, #10b981 0%, #34d399 100%);
+  box-shadow: 0 2px 10px rgba(16, 185, 129, 0.3);
+}
+
+#speexx-helper-repeat {
+  grid-column: 1 / -1;
+  background: linear-gradient(90deg, #f59e0b 0%, #f97316 100%);
+  box-shadow: 0 2px 10px rgba(245, 158, 11, 0.3);
+}
+
+#speexx-helper-continuous {
+  grid-column: 1 / -1;
+  background: linear-gradient(90deg, #0ea5e9 0%, #2563eb 100%);
+  box-shadow: 0 2px 10px rgba(37, 99, 235, 0.3);
+}
+
+#speexx-helper-stop {
+  grid-column: 1 / -1;
+  background: linear-gradient(90deg, #ef4444 0%, #dc2626 100%);
+  box-shadow: 0 2px 10px rgba(239, 68, 68, 0.3);
+}
+
+/* Focus outlines for accessibility */
+#speexx-helper-buttons button:focus-visible,
+#speexx-helper-toggle-debug:focus-visible,
+#speexx-helper-minimize:focus-visible,
+#speexx-helper-close:focus-visible {
+  outline: 2px solid #818cf8;
+  outline-offset: 2px;
+}
+
+/* ===========================
+   Minimized state
+   =========================== */
+#speexx-helper-main.sh-minimized #speexx-helper-content {
+  display: none;
+}
+
+/* ซ่อนเฉพาะพื้นที่ Debug โดยปุ่มควบคุมยังทำงานได้ตามปกติ */
+#speexx-helper-main.sh-debug-hidden #speexx-helper-log {
+  display: none;
+}
+
+#speexx-helper-main.sh-debug-hidden .sh-debug-heading { display: none; }
+
+#speexx-helper-main.sh-minimized {
+  width: auto !important;
+  max-height: none !important;
+}
+
+#speexx-helper-reopen {
+  position: fixed;
+  top: 12px;
+  right: 12px;
+  z-index: 999998;
+  width: 42px;
+  height: 42px;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(255,255,255,.2);
+  border-radius: 50%;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  box-shadow: 0 6px 18px rgba(15,23,42,.38);
+  color: white;
+  cursor: pointer;
+  font-size: 18px;
+}
+
+#speexx-helper-reopen:hover { transform: scale(1.06); }
+
+#speexx-helper-reopen img {
+  width: 21px;
+  height: 21px;
+  object-fit: contain;
+}
+
+#speexx-helper-floating-timer {
+  position: fixed;
+  z-index: 1000000;
+  left: 18px;
+  bottom: 18px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 10px 13px;
+  border: 1px solid rgba(129, 140, 248, .65);
+  border-radius: 12px;
+  background: rgba(15, 23, 42, .96);
+  color: #f8fafc;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, .35);
+  font-variant-numeric: tabular-nums;
+  pointer-events: none;
+}
+
+#speexx-helper-floating-timer[hidden] { display: none; }
+#speexx-helper-floating-timer strong { color: #c4b5fd; font-size: 14px; }
+.sh-floating-timer-label { color: #e2e8f0; font-size: 11px; font-weight: 700; }
+.sh-floating-timer-elapsed { color: #94a3b8; font-size: 10px; }
+
+#speexx-helper-timer-reminder {
+  position: fixed;
+  z-index: 1000000;
+  top: 22px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(360px, calc(100vw - 32px));
+  animation: sh-reminder-in .2s ease-out;
+}
+
+.sh-reminder-card {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 13px;
+  border: 1px solid rgba(251, 191, 36, .72);
+  border-radius: 13px;
+  background: #1e293b;
+  color: #f8fafc;
+  box-shadow: 0 14px 35px rgba(0, 0, 0, .38);
+}
+
+.sh-reminder-card > span { font-size: 22px; }
+.sh-reminder-card strong { display: block; font-size: 13px; }
+.sh-reminder-card p { margin: 3px 0 0; color: #cbd5e1; font-size: 11px; }
+.sh-reminder-card button { margin-left: auto; border: 0; background: transparent; color: #cbd5e1; cursor: pointer; font-size: 16px; }
+@keyframes sh-reminder-in { from { opacity: 0; transform: translate(-50%, -8px); } to { opacity: 1; transform: translate(-50%, 0); } }
+
+/* ===========================
+   Responsive
+   =========================== */
+@media (max-width: 480px) {
+  #speexx-helper-main {
+    top: 8px !important;
+    right: 8px !important;
+    left: 8px;
+    width: auto !important;
+  }
+
+  #speexx-helper-buttons {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  #speexx-helper-buttons button {
+    min-width: 0;
+    flex: none;
+  }
+}

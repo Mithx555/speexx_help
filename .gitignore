@@ -1,0 +1,13 @@
+# ไฟล์ระบบและไฟล์ชั่วคราว: ไม่ควรอัปขึ้น repository
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Log และไฟล์ debug ที่อาจมีข้อมูลเฉพาะเครื่อง
+*.log
+debug-report*.txt
+
+# โฟลเดอร์เครื่องมือและ dependency ในอนาคต
+node_modules/
+dist/
+build/
