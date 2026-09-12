@@ -53,5 +53,3 @@ extension/
 ## เครดิต
 
 พัฒนาโดย **Mithx** และ **บักโอม**
-
-ไอคอน Graduation cap ออกแบบโดย [Magnific](https://www.flaticon.com/authors/magnific) จาก [Flaticon](https://www.flaticon.com/free-icon/graduation-cap_1811357) ใช้งานตาม Flaticon License พร้อมเครดิตผู้สร้าง
