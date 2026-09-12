@@ -50,6 +50,12 @@ label { font-size: 11px; color: #c4d0e5; font-weight: 600; }
 .status.success { color: #6ee7b7; }.status.error { color: #fca5a5; }.status.info { color: #93c5fd; }
 /* เครดิตผู้จัดทำ: ตั้งใจให้เล็กและอยู่ท้ายหน้าต่างโดยไม่แย่งความสำคัญจากปุ่ม */
 .credits { margin: 5px 0 0; color: #64748b; font-size: 9px; text-align: center; }
+/* ส่วน About พับเก็บได้: แสดงข้อมูลโครงการโดยไม่รบกวนหน้าตั้งค่าหลัก */
+.about-panel { margin-top: 6px; color: #8292ae; font-size: 9px; text-align: center; }
+.about-panel summary { display: inline-block; cursor: pointer; color: #9ca3ff; }
+.about-panel p { margin: 5px 0 2px; }
+.about-panel a { color: #a5b4fc; text-decoration: none; }
+.about-panel a:hover { color: #ddd6fe; text-decoration: underline; }
 body[data-theme="light"] { color-scheme: light; background: #eef2ff; color: #172033; }
 body[data-theme="light"] .card { background: #fff; border-color: #d9e0ef; }
 body[data-theme="light"] .setting-field input, body[data-theme="light"] .toggle-setting, body[data-theme="light"] .profile-btn { background: #f7f9fc; color: #172033; border-color: #cbd5e1; }

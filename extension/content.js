@@ -2,7 +2,7 @@
 // ช่วยทำแบบฝึกหัด Speexx ด้วยวิธี Correction → จำคำตอบ → Repeat → ลากใส่ช่อง
 //
 // แผนที่สำหรับแก้ไขโค้ด:
-// - ปุ่ม/แผงลอย: createLogPanel()
+// - ปุ่ม/แผงลอยและรีเซ็ตสถิติ: createLogPanel()
 // - ตัวเลือกหน้า Speexx และการหาโจทย์: findExercise(), getExerciseType()
 // - ขั้นตอนทำโจทย์หลัก: solveCurrentExercise()
 // - ทำต่อข้ามหน้า “เรียนรู้ต่อ”: clickContinueLearningIfPresent()
@@ -81,7 +81,7 @@
           </div>
           <!-- สรุปเซสชัน: อัปเดตจาก updateSessionSummary() ด้านล่าง -->
           <div id="speexx-helper-session" class="sh-session-summary" aria-live="polite">
-            <span class="sh-session-title">สรุปเซสชัน</span><span id="sh-session-completed">✅ 0 ข้อ</span><span id="sh-session-time">⏱ 0 นาที</span><span id="sh-session-reviews">📖 0 ครั้ง</span>
+            <span class="sh-session-title">สรุปเซสชัน</span><span id="sh-session-completed">✅ 0 ข้อ</span><span id="sh-session-time">⏱ 0 นาที</span><span id="sh-session-reviews">📖 0 ครั้ง</span><button id="speexx-helper-reset-session" class="sh-session-reset" type="button" title="รีเซ็ตสถิติเซสชัน">↺</button>
           </div>
           <div class="sh-debug-heading"><span>รายละเอียดการทำงาน</span><button id="speexx-helper-export-debug" type="button" title="คัดลอกรายงาน Debug">⧉ ส่งออก Debug</button></div>
           <div id="speexx-helper-log">
@@ -147,6 +147,8 @@
 
     // ปุ่มส่งออก Debug: คัดลอกรายงานเพื่อส่งให้ผู้พัฒนา โดยไม่ดาวน์โหลดไฟล์
     document.getElementById('speexx-helper-export-debug').addEventListener('click', exportDebugReport);
+    // ปุ่มรีเซ็ตสถิติ: ใช้ได้เฉพาะตอนระบบหยุด เพื่อไม่ให้ข้อมูลของงานที่กำลังทำหายโดยไม่ตั้งใจ
+    document.getElementById('speexx-helper-reset-session').addEventListener('click', resetSessionStats);
 
     document.getElementById('speexx-helper-close').addEventListener('click', () => {
       logPanel.style.display = 'none';
@@ -219,6 +221,20 @@
     saveSessionStats();
     if (sessionSummaryTimer) clearInterval(sessionSummaryTimer);
     sessionSummaryTimer = setInterval(updateSessionSummary, 15000);
+  }
+
+  // รีเซ็ตเฉพาะสรุปเซสชันในเครื่อง ไม่เปลี่ยนการตั้งค่าเวลาและไม่ยุ่งกับประวัติของ Speexx
+  async function resetSessionStats() {
+    if (isRunning) {
+      addLog('หยุดการทำงานก่อนจึงจะรีเซ็ตสถิติเซสชันได้', 'warning');
+      return;
+    }
+    sessionStats = { startedAt: 0, endedAt: 0, completedCount: 0, reviewCount: 0, reviewMs: 0 };
+    if (sessionSummaryTimer) clearInterval(sessionSummaryTimer);
+    sessionSummaryTimer = null;
+    await new Promise(resolve => chrome.storage.local.remove(['speexxSessionStats'], resolve));
+    updateSessionSummary();
+    addLog('รีเซ็ตสถิติเซสชันแล้ว', 'success');
   }
 
   async function restoreSessionStats() {

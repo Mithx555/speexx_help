@@ -11,3 +11,6 @@ debug-report*.txt
 node_modules/
 dist/
 build/
+
+# ไฟล์ ZIP ที่สร้างเพื่ออัปโหลดเป็น GitHub Release
+release/*.zip

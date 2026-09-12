@@ -150,6 +150,9 @@
 /* แถบสรุปเซสชัน: จำนวนข้อ, เวลารวม และจำนวนครั้งทบทวน */
 .sh-session-summary { display:flex; align-items:center; gap:7px; margin:8px 11px 0; padding:7px 10px; border:1px solid rgba(148,163,184,.18); border-radius:9px; background:rgba(15,23,42,.32); color:#cbd5e1; font-size:10px; font-variant-numeric:tabular-nums; }
 .sh-session-title { margin-right:auto; color:#94a3b8; font-weight:700; }
+/* ปุ่มรีเซ็ตสถิติ: ปุ่มเล็กท้ายแถบสรุปเพื่อไม่ให้ชนกับปุ่มควบคุมหลัก */
+.sh-session-reset { border:0; padding:0 2px; background:transparent; color:#94a3b8; cursor:pointer; font:inherit; font-size:13px; line-height:1; }
+.sh-session-reset:hover { color:#f8fafc; }
 .sh-debug-heading { align-items:center; margin:11px 12px 0; color:#94a3b8; font-size:10px; }
 /* ปุ่มส่งออก Debug: อยู่กับหัวข้อรายละเอียดเพื่อหาเจอได้ทันที */
 #speexx-helper-export-debug { padding:3px 6px; border:1px solid rgba(129,140,248,.35); border-radius:6px; background:rgba(99,102,241,.14); color:#c7d2fe; cursor:pointer; font:inherit; font-size:10px; }
