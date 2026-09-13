@@ -167,8 +167,12 @@
 .sh-session-reset { border:0; padding:0 2px; background:transparent; color:#94a3b8; cursor:pointer; font:inherit; font-size:13px; line-height:1; }
 .sh-session-reset:hover { color:#f8fafc; }
 .sh-debug-heading { align-items:center; margin:11px 12px 0; color:#94a3b8; font-size:10px; }
-/* Debug Toolkit: รวมปุ่มตรวจหน้า, HTML, คัดลอก และล้างไว้ส่วนเดียวเพื่อส่งรายงานได้เร็ว */
-.sh-debug-actions { display:flex; flex-wrap:wrap; justify-content:flex-end; gap:4px; }
+/* Debug Toolkit: ปุ่มแยกเปิด/ปิดชุดเครื่องมือ เพื่อรักษาพื้นที่ของแผงให้กระชับ */
+.sh-debug-section { margin:10px 12px 0; }
+.sh-debug-tools-toggle { display:flex; align-items:center; justify-content:space-between; width:100%; min-height:29px; padding:5px 8px; border:1px solid rgba(129,140,248,.35); border-radius:7px; background:rgba(99,102,241,.1); color:#c7d2fe; cursor:pointer; font:inherit; font-size:10px; font-weight:700; }
+.sh-debug-tools-toggle:hover { background:rgba(99,102,241,.22); color:#fff; }
+.sh-debug-tools { margin-top:6px; }
+.sh-debug-actions { display:grid; grid-template-columns:repeat(3,1fr); gap:4px; }
 .sh-debug-actions button { padding:3px 5px; border:1px solid rgba(129,140,248,.35); border-radius:6px; background:rgba(99,102,241,.14); color:#c7d2fe; cursor:pointer; font:inherit; font-size:10px; }
 .sh-debug-actions button:hover { background:rgba(99,102,241,.28); color:#fff; }
 .sh-diagnostic-summary { margin:5px 12px 0; padding:5px 7px; border-left:2px solid #38bdf8; border-radius:4px; background:rgba(56,189,248,.08); color:#bae6fd; font-size:10px; line-height:1.35; }
@@ -409,6 +413,7 @@
 @media (prefers-reduced-motion:reduce) { #speexx-helper-main,#speexx-helper-main *,#speexx-helper-main *::before,#speexx-helper-main *::after { animation-duration:.01ms !important; animation-iteration-count:1 !important; transition-duration:.01ms !important; } }
 
 #speexx-helper-main.sh-debug-hidden .sh-debug-heading { display: none; }
+#speexx-helper-main.sh-debug-hidden .sh-debug-section { display: none; }
 #speexx-helper-main.sh-debug-hidden .sh-diagnostic-summary { display: none; }
 #speexx-helper-main.sh-debug-hidden .sh-unsupported { display: none; }
 

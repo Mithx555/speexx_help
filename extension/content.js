@@ -89,9 +89,14 @@
           <div id="speexx-helper-session" class="sh-session-summary" aria-live="polite">
             <span class="sh-session-title">สรุปเซสชัน</span><span id="sh-session-completed">✅ 0 ข้อ</span><span id="sh-session-time">⏱ 0 นาที</span><span id="sh-session-reviews">📖 0 ครั้ง</span><button id="speexx-helper-reset-session" class="sh-session-reset" type="button" title="รีเซ็ตสถิติเซสชัน">↺</button>
           </div>
-          <!-- Debug Toolkit: ตรวจสภาพหน้า, คัดลอกรายงาน และล้างบันทึกได้จากจุดเดียว -->
-          <div class="sh-debug-heading"><span>Debug Toolkit</span><div class="sh-debug-actions"><button id="speexx-helper-diagnose-page" type="button" title="ตรวจโครงสร้างข้อปัจจุบัน">⌕ ตรวจ</button><button id="speexx-helper-copy-html" type="button" title="คัดลอก HTML หน้าปัจจุบันแบบปกปิดช่องกรอก">&lt;/&gt; HTML</button><button id="speexx-helper-export-debug" type="button" title="คัดลอกรายงาน Debug">⧉ คัดลอก</button><button id="speexx-helper-report-issue" type="button" title="เปิด GitHub Issue พร้อม Debug">🐞 รายงาน</button><button id="speexx-helper-clear-debug" type="button" title="ล้างบันทึก Debug">↺ ล้าง</button></div></div>
-          <div id="speexx-helper-diagnostic-summary" class="sh-diagnostic-summary">กด “ตรวจ” เพื่อสรุปโครงสร้างข้อปัจจุบัน</div>
+          <!-- Debug Toolkit: ปุ่มแยกสำหรับเปิดชุดเครื่องมือ เพื่อไม่ให้หัวแผงแน่นเกินไป -->
+          <div class="sh-debug-section">
+            <button id="speexx-helper-debug-tools-toggle" class="sh-debug-tools-toggle" type="button" aria-expanded="false">🛠 Debug Toolkit <span>⌄</span></button>
+            <div id="speexx-helper-debug-tools" class="sh-debug-tools" hidden>
+              <div class="sh-debug-actions"><button id="speexx-helper-diagnose-page" type="button" title="ตรวจโครงสร้างข้อปัจจุบัน">⌕ ตรวจ</button><button id="speexx-helper-copy-html" type="button" title="คัดลอก HTML หน้าปัจจุบันแบบปกปิดช่องกรอก">&lt;/&gt; HTML</button><button id="speexx-helper-export-debug" type="button" title="คัดลอกรายงาน Debug">⧉ คัดลอก</button><button id="speexx-helper-report-issue" type="button" title="เปิด GitHub Issue พร้อม Debug">🐞 รายงาน</button><button id="speexx-helper-clear-debug" type="button" title="ล้างบันทึก Debug">↺ ล้าง</button></div>
+              <div id="speexx-helper-diagnostic-summary" class="sh-diagnostic-summary">กด “ตรวจ” เพื่อสรุปโครงสร้างข้อปัจจุบัน</div>
+            </div>
+          </div>
           <!-- แจ้งโจทย์ที่ไม่รองรับ: ให้ส่งข้อมูลที่จำเป็นได้จากการ์ดเดียวทันที -->
           <div id="speexx-helper-unsupported" class="sh-unsupported" hidden>
             <strong>⚠️ ยังไม่รองรับโจทย์นี้</strong>
@@ -172,6 +177,16 @@
     });
     debugToggleBtn.addEventListener('click', () => {
       setDebugVisibility(!mainPanel.classList.contains('sh-debug-hidden'));
+    });
+
+    // ปุ่ม Debug Toolkit แยกจากเครื่องมือด้านใน เพื่อเปิดเมื่อจำเป็นและลดความแน่นของแผง
+    const debugToolsToggle = document.getElementById('speexx-helper-debug-tools-toggle');
+    const debugTools = document.getElementById('speexx-helper-debug-tools');
+    debugToolsToggle.addEventListener('click', () => {
+      const expanded = debugTools.hidden;
+      debugTools.hidden = !expanded;
+      debugToolsToggle.setAttribute('aria-expanded', String(expanded));
+      debugToolsToggle.querySelector('span').textContent = expanded ? '⌃' : '⌄';
     });
 
     // ปุ่มส่งออก Debug: คัดลอกรายงานเพื่อส่งให้ผู้พัฒนา โดยไม่ดาวน์โหลดไฟล์
