@@ -40,6 +40,8 @@
   let sessionSummaryTimer = null;
   // รายการ Debug ล่าสุดสำหรับปุ่ม “ส่งออก Debug” (เก็บสูงสุด 150 เหตุการณ์)
   const debugEntries = [];
+  // ผลตรวจหน้าล่าสุด: เก็บไว้รวมใน Debug report เพื่อวิเคราะห์โดยไม่ต้องขอ HTML เพิ่ม
+  let latestPageDiagnostics = null;
   // Snapshot ก่อนเริ่มใส่คำตอบ: ใช้เทียบกับ DOM หลังเกิดปัญหาโดยไม่ต้องขอ HTML เพิ่ม
   let preApplyExerciseSnapshot = null;
   const pendingSleepCancellers = new Set();
@@ -83,7 +85,9 @@
           <div id="speexx-helper-session" class="sh-session-summary" aria-live="polite">
             <span class="sh-session-title">สรุปเซสชัน</span><span id="sh-session-completed">✅ 0 ข้อ</span><span id="sh-session-time">⏱ 0 นาที</span><span id="sh-session-reviews">📖 0 ครั้ง</span><button id="speexx-helper-reset-session" class="sh-session-reset" type="button" title="รีเซ็ตสถิติเซสชัน">↺</button>
           </div>
-          <div class="sh-debug-heading"><span>รายละเอียดการทำงาน</span><button id="speexx-helper-export-debug" type="button" title="คัดลอกรายงาน Debug">⧉ ส่งออก Debug</button></div>
+          <!-- Debug Toolkit: ตรวจสภาพหน้า, คัดลอกรายงาน และล้างบันทึกได้จากจุดเดียว -->
+          <div class="sh-debug-heading"><span>Debug Toolkit</span><div class="sh-debug-actions"><button id="speexx-helper-diagnose-page" type="button" title="ตรวจโครงสร้างข้อปัจจุบัน">⌕ ตรวจ</button><button id="speexx-helper-export-debug" type="button" title="คัดลอกรายงาน Debug">⧉ คัดลอก</button><button id="speexx-helper-clear-debug" type="button" title="ล้างบันทึก Debug">↺ ล้าง</button></div></div>
+          <div id="speexx-helper-diagnostic-summary" class="sh-diagnostic-summary">กด “ตรวจ” เพื่อสรุปโครงสร้างข้อปัจจุบัน</div>
           <div id="speexx-helper-log">
             <div class="sh-empty">กดปุ่มด้านล่างเพื่อเริ่มทำแบบฝึกหัด</div>
           </div>
@@ -147,6 +151,9 @@
 
     // ปุ่มส่งออก Debug: คัดลอกรายงานเพื่อส่งให้ผู้พัฒนา โดยไม่ดาวน์โหลดไฟล์
     document.getElementById('speexx-helper-export-debug').addEventListener('click', exportDebugReport);
+    // เครื่องมือ Debug: ตรวจหน้าและล้างเฉพาะบันทึกในหน่วยความจำ ไม่กระทบคำตอบหรือการตั้งค่า
+    document.getElementById('speexx-helper-diagnose-page').addEventListener('click', diagnoseCurrentPage);
+    document.getElementById('speexx-helper-clear-debug').addEventListener('click', clearDebugLog);
     // ปุ่มรีเซ็ตสถิติ: ใช้ได้เฉพาะตอนระบบหยุด เพื่อไม่ให้ข้อมูลของงานที่กำลังทำหายโดยไม่ตั้งใจ
     document.getElementById('speexx-helper-reset-session').addEventListener('click', resetSessionStats);
 
@@ -418,8 +425,64 @@
       preApplyExerciseSnapshot ? JSON.stringify(preApplyExerciseSnapshot, null, 2) : '(ยังไม่มีข้อมูล)',
       '',
       '=== DOM ปัจจุบันตอนส่งออก Debug ===',
-      currentSnapshot ? JSON.stringify(currentSnapshot, null, 2) : '(ไม่พบ exercise)'
+      currentSnapshot ? JSON.stringify(currentSnapshot, null, 2) : '(ไม่พบ exercise)',
+      '',
+      '=== ผลตรวจหน้าล่าสุด ===',
+      latestPageDiagnostics ? JSON.stringify(latestPageDiagnostics, null, 2) : '(ยังไม่ได้กดตรวจหน้า)'
     ].join('\n');
+  }
+
+  // ตรวจเฉพาะโครงสร้างที่จำเป็นต่อการทำงาน โดยไม่คลิกหรือแก้ไขแบบฝึกหัด
+  function collectPageDiagnostics() {
+    const exercise = findExercise();
+    const countUsable = selector => Array.from(document.querySelectorAll(selector)).filter(isUsableAction).length;
+    return {
+      checkedAt: new Date().toISOString(),
+      url: location.href,
+      exerciseFound: Boolean(exercise),
+      exerciseType: getExerciseType() || 'unknown',
+      exerciseClass: exercise ? String(exercise.className || '') : null,
+      controls: {
+        correction: countUsable('button.action-exercise-button.correct, .action-exercise-button.correct'),
+        next: countUsable('button.action-exercise-button.next, .action-exercise-button.next, .nxt-exercise'),
+        repeat: countUsable('button.repeat, .repeat button, button[class*="repeat"]'),
+        start: countUsable('button.start, .start button, button[class*="start"]')
+      },
+      fields: exercise ? {
+        textInputs: exercise.querySelectorAll('input[type="text"], textarea').length,
+        gaps: exercise.querySelectorAll('.gap, .drag-drop-placeholder').length,
+        draggableItems: exercise.querySelectorAll('.draggable, [draggable="true"], .draggable-container').length,
+        scrambledCells: exercise.querySelectorAll('.scrambled-cell, .scrambled-block').length
+      } : null
+    };
+  }
+
+  // ปุ่ม “ตรวจ”: แสดงสรุปสั้นในแผงและเพิ่มข้อมูลละเอียดให้ Export Debug อัตโนมัติ
+  function diagnoseCurrentPage() {
+    latestPageDiagnostics = collectPageDiagnostics();
+    const diagnostic = latestPageDiagnostics;
+    const summary = document.getElementById('speexx-helper-diagnostic-summary');
+    const typeLabel = diagnostic.exerciseType;
+    const controlText = `Correction ${diagnostic.controls.correction} · Next ${diagnostic.controls.next}`;
+    if (summary) summary.textContent = diagnostic.exerciseFound
+      ? `พบ ${typeLabel} · ${controlText}`
+      : 'ไม่พบพื้นที่แบบฝึกหัดในหน้าปัจจุบัน';
+    if (!diagnostic.exerciseFound || !diagnostic.controls.correction) {
+      addLog(`ตรวจหน้า: ${typeLabel} — ไม่พบปุ่ม Correction ที่พร้อมใช้`, 'warning');
+      return;
+    }
+    addLog(`ตรวจหน้า: ${typeLabel} · ${controlText} · ช่อง ${diagnostic.fields.gaps}`, 'success');
+  }
+
+  // ปุ่ม “ล้าง”: ล้างเฉพาะเหตุการณ์ Debug บนหน้านี้ แล้วคงข้อความยืนยันหนึ่งรายการไว้
+  function clearDebugLog() {
+    debugEntries.length = 0;
+    preApplyExerciseSnapshot = null;
+    latestPageDiagnostics = null;
+    if (logContainer) logContainer.replaceChildren();
+    const summary = document.getElementById('speexx-helper-diagnostic-summary');
+    if (summary) summary.textContent = 'ล้างบันทึกแล้ว · กด “ตรวจ” เพื่อเก็บข้อมูลใหม่';
+    addLog('ล้างบันทึก Debug แล้ว', 'info');
   }
 
   // เก็บโครงสร้างสำคัญแบบย่อ โดยเน้น Scrambled เพื่อใช้แก้บั๊กจากรายงานเพียงชุดเดียว
