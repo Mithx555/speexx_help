@@ -2,13 +2,11 @@
 // - timeProfiles: ค่าโปรไฟล์ ช้า / ปกติ / ละเอียด
 // - normalize...: ขอบเขตนาทีที่อนุญาต
 // - saveBtn listener: รายการค่าที่บันทึกลง Chrome storage
-// - autoBtn listener: ปุ่มเริ่มทำจาก Popup
 document.addEventListener('DOMContentLoaded', async () => {
   const speedSlider = document.getElementById('speedSlider');
   const speedValue = document.getElementById('speedValue');
   const saveBtn = document.getElementById('saveBtn');
   const resetBtn = document.getElementById('resetBtn');
-  const autoBtn = document.getElementById('autoBtn');
   const status = document.getElementById('status');
   const themeToggleBtn = document.getElementById('themeToggleBtn');
   const reviewMinutes = document.getElementById('reviewMinutes');
@@ -28,7 +26,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   const normalizeMinutes = value => Math.min(120, Math.max(1, Number.parseInt(value, 10) || 5));
   const normalizeReminderMinutes = value => Math.min(30, Math.max(1, Number.parseInt(value, 10) || 1));
   const normalizeContinuousReviewMinutes = value => Math.min(120, Math.max(1, Number.parseInt(value, 10) || 5));
-  const isSpeexxTab = tab => Boolean(tab?.url?.startsWith('https://portal.speexx.com/'));
   const showStatus = (text, type = '') => { status.textContent = text; status.className = `status ${type}`; };
   // สลับหมวดโดยใช้ hidden เพื่อให้ screen reader และการกด Tab ไม่เข้าถึงเนื้อหาที่ซ่อนอยู่
   const selectSettingsTab = tabName => {
@@ -109,14 +106,5 @@ document.addEventListener('DOMContentLoaded', async () => {
     await chrome.storage.sync.remove(['questionMinutes', 'reviewMinutes', 'reminderMinutes', 'activeTimeProfile', 'manualReviewBeforeContinue', 'continuousReviewMinutes']);
     showStatus('รีเซ็ตการตั้งค่าเป็นค่าเริ่มต้นแล้ว', 'success');
   });
-  const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-  autoBtn.disabled = !isSpeexxTab(tab);
-  if (autoBtn.disabled) showStatus('กรุณาเปิดหน้า Speexx Portal ก่อน', 'error');
-  autoBtn.addEventListener('click', async () => {
-    try {
-      await chrome.storage.sync.set({ questionMinutes: normalizeMinutes(speedSlider.value) });
-      await chrome.tabs.sendMessage(tab.id, { action: 'startSolveAll' });
-      showStatus('กำลังเริ่มทำแบบฝึกหัด', 'info'); setTimeout(() => window.close(), 1000);
-    } catch { showStatus('เชื่อมต่อกับหน้า Speexx ไม่ได้ ลองรีเฟรชหน้าเว็บ', 'error'); }
-  });
+  // ไม่มีปุ่มเริ่มใน Popup: ผู้ใช้เลือกโหมดจากแผงลอยบนหน้า Speexx เพื่อเห็นสถานะก่อนเริ่มเสมอ
 });
