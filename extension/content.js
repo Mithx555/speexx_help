@@ -73,6 +73,8 @@
         <div id="speexx-helper-header">
           <div class="sh-heading"><span class="sh-title"><img class="sh-brand-icon" src="${brandIconUrl}" alt="" aria-hidden="true">Speexx Helper</span><span id="speexx-helper-status" class="sh-status">พร้อมใช้งาน</span><span id="speexx-helper-compact-status" class="sh-compact-status">พร้อมเริ่ม</span><span id="speexx-helper-timer" class="sh-timer" hidden></span></div>
           <div class="sh-controls">
+            <button id="speexx-helper-lock-position" type="button" title="ล็อกตำแหน่งแผง" aria-pressed="false">🔓</button>
+            <button id="speexx-helper-reset-position" type="button" title="รีเซ็ตตำแหน่งไปมุมขวาบน">⌖</button>
             <button id="speexx-helper-toggle-debug" type="button" title="ซ่อน Debug" aria-pressed="false">⌘</button>
             <button id="speexx-helper-minimize" type="button" title="ย่อ/ขยาย">−</button>
             <button id="speexx-helper-close" type="button" title="ปิด">✕</button>
@@ -88,7 +90,7 @@
             <span class="sh-session-title">สรุปเซสชัน</span><span id="sh-session-completed">✅ 0 ข้อ</span><span id="sh-session-time">⏱ 0 นาที</span><span id="sh-session-reviews">📖 0 ครั้ง</span><button id="speexx-helper-reset-session" class="sh-session-reset" type="button" title="รีเซ็ตสถิติเซสชัน">↺</button>
           </div>
           <!-- Debug Toolkit: ตรวจสภาพหน้า, คัดลอกรายงาน และล้างบันทึกได้จากจุดเดียว -->
-          <div class="sh-debug-heading"><span>Debug Toolkit</span><div class="sh-debug-actions"><button id="speexx-helper-diagnose-page" type="button" title="ตรวจโครงสร้างข้อปัจจุบัน">⌕ ตรวจ</button><button id="speexx-helper-copy-html" type="button" title="คัดลอก HTML หน้าปัจจุบันแบบปกปิดช่องกรอก">&lt;/&gt; HTML</button><button id="speexx-helper-export-debug" type="button" title="คัดลอกรายงาน Debug">⧉ คัดลอก</button><button id="speexx-helper-clear-debug" type="button" title="ล้างบันทึก Debug">↺ ล้าง</button></div></div>
+          <div class="sh-debug-heading"><span>Debug Toolkit</span><div class="sh-debug-actions"><button id="speexx-helper-diagnose-page" type="button" title="ตรวจโครงสร้างข้อปัจจุบัน">⌕ ตรวจ</button><button id="speexx-helper-copy-html" type="button" title="คัดลอก HTML หน้าปัจจุบันแบบปกปิดช่องกรอก">&lt;/&gt; HTML</button><button id="speexx-helper-export-debug" type="button" title="คัดลอกรายงาน Debug">⧉ คัดลอก</button><button id="speexx-helper-report-issue" type="button" title="เปิด GitHub Issue พร้อม Debug">🐞 รายงาน</button><button id="speexx-helper-clear-debug" type="button" title="ล้างบันทึก Debug">↺ ล้าง</button></div></div>
           <div id="speexx-helper-diagnostic-summary" class="sh-diagnostic-summary">กด “ตรวจ” เพื่อสรุปโครงสร้างข้อปัจจุบัน</div>
           <!-- แจ้งโจทย์ที่ไม่รองรับ: ให้ส่งข้อมูลที่จำเป็นได้จากการ์ดเดียวทันที -->
           <div id="speexx-helper-unsupported" class="sh-unsupported" hidden>
@@ -177,6 +179,7 @@
     // เครื่องมือ Debug: ตรวจหน้าและล้างเฉพาะบันทึกในหน่วยความจำ ไม่กระทบคำตอบหรือการตั้งค่า
     document.getElementById('speexx-helper-diagnose-page').addEventListener('click', diagnoseCurrentPage);
     document.getElementById('speexx-helper-copy-html').addEventListener('click', copySanitizedPageHtml);
+    document.getElementById('speexx-helper-report-issue').addEventListener('click', reportIssueToGitHub);
     document.getElementById('speexx-helper-clear-debug').addEventListener('click', clearDebugLog);
     document.getElementById('speexx-helper-unsupported-debug').addEventListener('click', exportDebugReport);
     document.getElementById('speexx-helper-unsupported-html').addEventListener('click', copySanitizedPageHtml);
@@ -200,6 +203,28 @@
       chrome.storage.local.set({ speexxMinimized: isMinimized });
     });
 
+    // ล็อกตำแหน่ง: ป้องกันการลากโดยไม่ตั้งใจ แต่ยังอนุญาตให้กดรีเซ็ตตำแหน่งได้
+    const lockPositionBtn = document.getElementById('speexx-helper-lock-position');
+    const setPositionLock = locked => {
+      mainPanel.dataset.positionLocked = String(locked);
+      lockPositionBtn.setAttribute('aria-pressed', String(locked));
+      lockPositionBtn.textContent = locked ? '🔒' : '🔓';
+      lockPositionBtn.title = locked ? 'ปลดล็อกตำแหน่งแผง' : 'ล็อกตำแหน่งแผง';
+    };
+    lockPositionBtn.addEventListener('click', () => {
+      const locked = mainPanel.dataset.positionLocked !== 'true';
+      setPositionLock(locked);
+      chrome.storage.local.set({ speexxPanelPositionLocked: locked });
+    });
+    // รีเซ็ตตำแหน่ง: คืน CSS กลับมุมขวาบนและล้างค่าเดิมในเครื่อง
+    document.getElementById('speexx-helper-reset-position').addEventListener('click', () => {
+      mainPanel.style.top = '10px';
+      mainPanel.style.right = '10px';
+      mainPanel.style.left = '';
+      chrome.storage.local.remove(['speexxPanelPosition']);
+      addLog('รีเซ็ตตำแหน่งแผงไปมุมขวาบนแล้ว', 'success');
+    });
+
     // ปรับข้อความหรือเพิ่มปุ่มควบคุมใหม่ในส่วน HTML ด้านบนและ listener ตรงนี้
     document.getElementById('speexx-helper-solve-all').addEventListener('click', () => startSolving(true));
     document.getElementById('speexx-helper-solve-one').addEventListener('click', () => startSolving(false));
@@ -213,7 +238,7 @@
       stopSolving();
     });
 
-    chrome.storage.local.get(['speexxPanelPosition', 'speexxMinimized'], ({ speexxPanelPosition, speexxMinimized }) => {
+    chrome.storage.local.get(['speexxPanelPosition', 'speexxMinimized', 'speexxPanelPositionLocked'], ({ speexxPanelPosition, speexxMinimized, speexxPanelPositionLocked = false }) => {
       if (speexxPanelPosition) {
         mainPanel.style.top = `${Math.max(8, Math.min(window.innerHeight - 80, speexxPanelPosition.top))}px`;
         mainPanel.style.left = `${Math.max(8, Math.min(window.innerWidth - 80, speexxPanelPosition.left))}px`;
@@ -223,6 +248,7 @@
         mainPanel.classList.add('sh-minimized');
         minimizeBtn.textContent = '+';
       }
+      setPositionLock(Boolean(speexxPanelPositionLocked));
     });
 
     makeDraggable(document.getElementById('speexx-helper-header'));
@@ -356,6 +382,7 @@
     element.addEventListener('pointerdown', event => {
       if (event.button !== 0 || event.target.closest('button, a, input, select, textarea, label')) return;
       const panel = element.parentElement;
+      if (panel.dataset.positionLocked === 'true') return;
       const panelRect = panel.getBoundingClientRect();
       const zoom = panel.offsetWidth ? panelRect.width / panel.offsetWidth : 1;
       dragState = {
@@ -665,6 +692,27 @@
       if (field.tagName === 'SELECT') field.selectedIndex = -1;
     });
     return `<!-- Speexx Helper sanitized HTML | ${new Date().toISOString()} | ${location.href} -->\n<!DOCTYPE html>\n${pageCopy.outerHTML}`;
+  }
+
+  // เปิด Issue template: ถ้ารายงานยาวเกิน URL จะคัดลอกไว้ใน Clipboard แล้วให้ผู้ใช้วางแทน
+  async function reportIssueToGitHub() {
+    const report = buildDebugReport();
+    let copied = false;
+    try {
+      await navigator.clipboard.writeText(report);
+      copied = true;
+    } catch (_) { /* ยังเปิด Issue ได้ แม้ Clipboard ถูกปฏิเสธ */ }
+    const maxPrefillLength = 5500;
+    const reportBody = report.length <= maxPrefillLength
+      ? `## Debug Report\n\n\`\`\`text\n${report}\n\`\`\``
+      : 'Debug Report ยาวเกินลิงก์และถูกคัดลอกไว้แล้ว กรุณาวางในส่วน Debug Report ด้านล่าง';
+    const params = new URLSearchParams({
+      template: 'bug_report.md',
+      title: `[Bug]: ${getExerciseType() || 'unknown'} — ${location.pathname.split('/').pop() || 'Speexx'}`,
+      body: reportBody
+    });
+    chrome.runtime.sendMessage({ action: 'openGithubPage', url: `https://github.com/Mithx555/speexx_help/issues/new?${params}` });
+    addLog(copied ? 'เปิด GitHub Issue แล้ว — Debug Report ถูกคัดลอกพร้อมวาง' : 'เปิด GitHub Issue แล้ว — กดคัดลอก Debug หากต้องแนบรายงาน', 'success');
   }
 
   // ปุ่ม HTML: คัดลอกตามคำสั่งผู้ใช้เท่านั้น และแจ้งให้ตรวจข้อมูลส่วนบุคคลก่อนแชร์ทุกครั้ง

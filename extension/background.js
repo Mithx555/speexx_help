@@ -47,7 +47,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       .catch(() => sendResponse({ ok: false }));
   }
   // เปิดลิงก์ Release ในแท็บใหม่จาก extension context เพื่อไม่กระทบหน้าเรียน
-  if (message.action === 'openRelease' && typeof message.url === 'string' && message.url.startsWith('https://github.com/')) {
+  if ((message.action === 'openRelease' || message.action === 'openGithubPage') && typeof message.url === 'string' && message.url.startsWith('https://github.com/')) {
     chrome.tabs.create({ url: message.url });
     sendResponse({ ok: true });
   }
