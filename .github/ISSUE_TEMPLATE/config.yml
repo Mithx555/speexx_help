@@ -1,10 +1,9 @@
-# ตั้งค่า Issue template: ให้ผู้ใช้ใช้แบบฟอร์มรายงานปัญหามาตรฐานของโครงการ
+# ใช้แบบฟอร์มเดียวกันเพื่อให้ข้อมูลที่ได้รับครบและตามปัญหาได้ง่าย
 blank_issues_enabled: false
 contact_links:
   - name: คู่มือทดสอบ
     url: https://github.com/Mithx555/speexx_help/blob/main/TESTING.md
-    about: ตรวจคู่มือทดสอบก่อนเปิด Issue ใหม่
+    about: ลองเช็กตามคู่มือนี้ก่อนเปิด Issue ใหม่
   - name: Privacy Policy
     url: https://github.com/Mithx555/speexx_help/blob/main/PRIVACY.md
-    about: อ่านนโยบายข้อมูลและการใช้ Debug Report
-
+    about: ดูว่าข้อมูลอะไรอยู่ใน Debug Report และควรแชร์อย่างไร
