@@ -376,6 +376,16 @@
 #speexx-helper-main[data-panel-size="compact"] { zoom:.9; }
 #speexx-helper-main[data-panel-size="large"] { zoom:1.1; }
 
+/* Motion UX ของแผงลอย: เปิดแผงและเพิ่มบันทึกแบบนุ่มนวล โดยไม่ยุ่งกับขั้นตอนทำโจทย์ */
+#speexx-helper-main { animation:sh-panel-enter .24s ease-out both; }
+#speexx-helper-header { transition:background .22s ease; }
+#speexx-helper-buttons button:active:not(:disabled) { transform:translateY(0) scale(.98); }
+.sh-log-row { animation:sh-log-enter .18s ease-out both; }
+@keyframes sh-panel-enter { from { opacity:0; transform:translateY(-8px) scale(.98); } to { opacity:1; transform:translateY(0) scale(1); } }
+@keyframes sh-log-enter { from { opacity:0; transform:translateX(5px); } to { opacity:1; transform:translateX(0); } }
+/* ลดการเคลื่อนไหวเมื่อผู้ใช้ตั้งค่า Reduce Motion ในระบบปฏิบัติการ */
+@media (prefers-reduced-motion:reduce) { #speexx-helper-main,#speexx-helper-main *,#speexx-helper-main *::before,#speexx-helper-main *::after { animation-duration:.01ms !important; animation-iteration-count:1 !important; transition-duration:.01ms !important; } }
+
 #speexx-helper-main.sh-debug-hidden .sh-debug-heading { display: none; }
 #speexx-helper-main.sh-debug-hidden .sh-diagnostic-summary { display: none; }
 

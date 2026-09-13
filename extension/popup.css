@@ -29,3 +29,23 @@ body { width:380px; margin:0; background:var(--page); color:var(--text); }
 body[data-theme="light"] { color-scheme:light; --page:#edf4ff; --page-glow:#d7e7ff; --surface:#fff; --surface-raised:#f5f8ff; --surface-input:#f4f7fb; --border:#c5d4e8; --border-soft:rgba(71,85,105,.16); --text:#14213d; --text-soft:#334155; --text-muted:#64748b; --primary:#6255df; --primary-strong:#4b3cc7; --primary-soft:rgba(98,85,223,.12); --accent:#0284c7; --success:#059669; --danger:#e11d48; --shadow:rgba(15,23,42,.14); }body[data-theme="light"] .settings-tab[aria-selected="true"] { color:#fff; }body[data-theme="light"] .profile-btn[aria-pressed="true"] { color:#4338ca; }body[data-theme="light"] .general-note { background:#eff8ff; }
 /* สีเน้นที่ผู้ใช้เลือก: ใช้กับ Popup ทันที และ content.css ใช้ชื่อค่าเดียวกันกับแผงลอย */
 body[data-accent="blue"] { --primary:#0284c7; --primary-strong:#0369a1; --primary-soft:rgba(2,132,199,.16); --accent:#38bdf8; }body[data-accent="green"] { --primary:#059669; --primary-strong:#047857; --primary-soft:rgba(5,150,105,.16); --accent:#34d399; }body[data-accent="rose"] { --primary:#e11d48; --primary-strong:#be123c; --primary-soft:rgba(225,29,72,.16); --accent:#fb7185; }
+
+/* Motion UX: การเคลื่อนไหวสั้น ๆ ช่วยบอกการเปิด Popup, สลับแท็บ และการกดปุ่ม */
+.popup-container { animation:sh-popup-enter .22s ease-out both; }
+.card { animation:sh-card-enter .26s .04s ease-out both; }
+.settings-panel { animation:sh-tab-enter .2s ease-out both; }
+.theme-toggle-btn { transition:transform .16s ease,background .16s ease,border-color .16s ease; }
+.theme-toggle-btn:hover { transform:rotate(12deg) scale(1.04); }
+.settings-tab,.appearance-choice { transition:transform .15s ease,border-color .16s ease,background .16s ease,color .16s ease; }
+.settings-tab:hover,.appearance-choice:hover { transform:translateY(-1px); }
+.appearance-choice[aria-pressed="true"] .accent-dot { transform:scale(1.35); }
+.accent-dot { transition:transform .16s ease; }
+.btn { transition:transform .15s ease,filter .15s ease,box-shadow .15s ease; }
+.btn:active:not(:disabled) { transform:translateY(0) scale(.98); }
+.status.success,.status.error,.status.info { animation:sh-status-pop .24s ease-out; }
+@keyframes sh-popup-enter { from { opacity:0; } to { opacity:1; } }
+@keyframes sh-card-enter { from { opacity:0; transform:translateY(7px); } to { opacity:1; transform:translateY(0); } }
+@keyframes sh-tab-enter { from { opacity:0; transform:translateX(5px); } to { opacity:1; transform:translateX(0); } }
+@keyframes sh-status-pop { from { opacity:.3; transform:translateY(2px); } to { opacity:1; transform:translateY(0); } }
+/* ลดการเคลื่อนไหวเมื่อผู้ใช้ตั้งค่า Reduce Motion ในระบบปฏิบัติการ */
+@media (prefers-reduced-motion:reduce) { *,*::before,*::after { animation-duration:.01ms !important; animation-iteration-count:1 !important; scroll-behavior:auto !important; transition-duration:.01ms !important; } }
