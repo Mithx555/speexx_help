@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Speexx Helper",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "ช่วยทำแบบฝึกหัดใน Speexx Portal อัตโนมัติ",
   "icons": {
     "16": "icons/graduation-cap.png",
