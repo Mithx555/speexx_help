@@ -16,6 +16,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   const manualReviewBeforeContinue = document.getElementById('manualReviewBeforeContinue');
   const continuousReviewMinutes = document.getElementById('continuousReviewMinutes');
   const profileButtons = Array.from(document.querySelectorAll('.profile-btn'));
+  // ระบบแท็บ: data-tab ของปุ่มต้องตรงกับ suffix ใน id "settings-..." ของแต่ละ panel
+  const settingsTabs = Array.from(document.querySelectorAll('.settings-tab'));
+  const settingsPanels = Array.from(document.querySelectorAll('.settings-panel'));
   // เปลี่ยนตัวเลขของโปรไฟล์เวลาได้ตรงนี้
   const timeProfiles = {
     slow: { question: 15, review: 8 },
@@ -27,6 +30,16 @@ document.addEventListener('DOMContentLoaded', async () => {
   const normalizeContinuousReviewMinutes = value => Math.min(120, Math.max(1, Number.parseInt(value, 10) || 5));
   const isSpeexxTab = tab => Boolean(tab?.url?.startsWith('https://portal.speexx.com/'));
   const showStatus = (text, type = '') => { status.textContent = text; status.className = `status ${type}`; };
+  // สลับหมวดโดยใช้ hidden เพื่อให้ screen reader และการกด Tab ไม่เข้าถึงเนื้อหาที่ซ่อนอยู่
+  const selectSettingsTab = tabName => {
+    settingsTabs.forEach(tab => {
+      const selected = tab.dataset.tab === tabName;
+      tab.setAttribute('aria-selected', String(selected));
+      tab.tabIndex = selected ? 0 : -1;
+    });
+    settingsPanels.forEach(panel => { panel.hidden = panel.id !== `settings-${tabName}`; });
+  };
+  settingsTabs.forEach(tab => tab.addEventListener('click', () => selectSettingsTab(tab.dataset.tab)));
   const { theme = 'dark' } = await chrome.storage.sync.get(['theme']);
   const timedSettings = await chrome.storage.sync.get(['questionMinutes', 'reviewMinutes', 'reminderMinutes', 'activeTimeProfile', 'manualReviewBeforeContinue', 'continuousReviewMinutes']);
   speedSlider.value = normalizeMinutes(timedSettings.questionMinutes); speedValue.value = speedSlider.value;

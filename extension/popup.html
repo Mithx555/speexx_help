@@ -20,47 +20,69 @@
       <div class="section-heading"><span class="section-icon">⚙️</span>
         <div>
           <h2>ตั้งค่าการทำงาน</h2>
-          <p>ปรับเวลาให้เหมาะกับของคุณ</p>
+          <p>เลือกหมวดเพื่อปรับเฉพาะส่วนที่ต้องการ</p>
         </div>
       </div>
-      <!-- เวลาเป้าหมายต่อข้อ: แก้ช่วง min/max หรือข้อความหน่วยได้ที่ส่วนนี้ -->
-      <label for="speedSlider">เวลาทำแต่ละข้อ</label>
-      <div class="speed-control">
-        <input type="range" id="speedSlider" min="1" max="120" value="5">
-        <output id="speedValue" for="speedSlider">5</output><span>นาที/ข้อ</span>
+
+      <!-- แท็บตั้งค่า: data-tab ต้องตรงกับ id ของ .settings-panel เพื่อให้ popup.js สลับหน้าได้ -->
+      <div class="settings-tabs" role="tablist" aria-label="หมวดการตั้งค่า">
+        <button class="settings-tab" type="button" role="tab" aria-selected="true" aria-controls="settings-general" data-tab="general">ทั่วไป</button>
+        <button class="settings-tab" type="button" role="tab" aria-selected="false" aria-controls="settings-timed" data-tab="timed">จับเวลา</button>
+        <button class="settings-tab" type="button" role="tab" aria-selected="false" aria-controls="settings-continuous" data-tab="continuous">ต่อเนื่อง</button>
+        <button class="settings-tab" type="button" role="tab" aria-selected="false" aria-controls="settings-about" data-tab="about">เกี่ยวกับ</button>
       </div>
-      <!-- โปรไฟล์เวลา: ปุ่มเหล่านี้เชื่อมกับ timeProfiles ใน popup.js -->
-      <div class="section-label">โปรไฟล์เวลา</div>
-      <div class="profile-buttons" role="group" aria-label="เลือกโปรไฟล์เวลา">
-        <button type="button" class="profile-btn" data-profile="slow">ช้า</button>
-        <button type="button" class="profile-btn" data-profile="normal">ปกติ</button>
-        <button type="button" class="profile-btn" data-profile="detailed">ละเอียด</button>
-      </div>
-      <!-- ตั้งค่าสำหรับปุ่ม “ทำทั้งหมดแบบจับเวลา” บนแผงลอย -->
-      <div class="section-label">⏱ ทำทั้งหมดแบบจับเวลา</div>
-      <div class="repeat-settings">
-        <div class="setting-field"><label for="reviewMinutes">ทบทวนก่อน Next</label>
-          <div class="number-control"><input id="reviewMinutes" type="number" min="1" max="120"
-              value="2"><span>นาที</span></div>
+
+      <!-- แท็บทั่วไป: จุดเริ่มต้นสำหรับผู้ใช้ที่ต้องการเริ่มใช้งานทันที -->
+      <section id="settings-general" class="settings-panel" role="tabpanel">
+        <div class="tab-intro"><strong>พร้อมเริ่มทำแบบฝึกหัด</strong><span>ตั้งเวลาและโหมดต่อเนื่องได้จากแท็บถัดไป</span></div>
+        <div class="general-note"><span aria-hidden="true">💡</span><p>เปิด Speexx Portal ก่อน แล้วกด “เริ่มทำปกติ” ด้านล่างเพื่อเริ่มจากข้อปัจจุบัน</p></div>
+      </section>
+
+      <!-- แท็บจับเวลา: เวลาเป้าหมายต่อข้อและช่วงทบทวนของโหมดจับเวลา -->
+      <section id="settings-timed" class="settings-panel" role="tabpanel" hidden>
+        <label for="speedSlider">เวลาทำแต่ละข้อ</label>
+        <div class="speed-control">
+          <input type="range" id="speedSlider" min="1" max="120" value="5">
+          <output id="speedValue" for="speedSlider">5</output><span>นาที/ข้อ</span>
         </div>
-        <div class="setting-field"><label for="reminderMinutes">เตือนก่อนหมดเวลา</label>
-          <div class="number-control"><input id="reminderMinutes" type="number" min="1" max="30"
-              value="1"><span>นาที</span></div>
+        <!-- โปรไฟล์เวลา: ปุ่มเหล่านี้เชื่อมกับ timeProfiles ใน popup.js -->
+        <div class="section-label">โปรไฟล์เวลา</div>
+        <div class="profile-buttons" role="group" aria-label="เลือกโปรไฟล์เวลา">
+          <button type="button" class="profile-btn" data-profile="slow">ช้า</button>
+          <button type="button" class="profile-btn" data-profile="normal">ปกติ</button>
+          <button type="button" class="profile-btn" data-profile="detailed">ละเอียด</button>
         </div>
-      </div>
-      <!-- ตั้งค่าสำหรับปุ่ม “ทำอัตโนมัติต่อเนื่อง”; เวลานี้ใช้หลังจบแต่ละข้อ -->
-      <div class="section-label">🔁 โหมดต่อเนื่อง</div>
-      <div class="continuous-settings">
-        <label class="toggle-setting" for="manualReviewBeforeContinue">
-          <input id="manualReviewBeforeContinue" type="checkbox" checked>
-          <span>ทบทวนหลังแต่ละข้อ</span>
-        </label>
-        <div class="setting-field continuous-review-field"><label for="continuousReviewMinutes">ทบทวน</label>
-          <div class="number-control"><input id="continuousReviewMinutes" type="number" min="1" max="120"
-              value="5"><span>นาที</span></div>
+        <div class="section-label">⏱ ทำทั้งหมดแบบจับเวลา</div>
+        <div class="repeat-settings">
+          <div class="setting-field"><label for="reviewMinutes">ทบทวนก่อน Next</label>
+            <div class="number-control"><input id="reviewMinutes" type="number" min="1" max="120" value="2"><span>นาที</span></div>
+          </div>
+          <div class="setting-field"><label for="reminderMinutes">เตือนก่อนหมดเวลา</label>
+            <div class="number-control"><input id="reminderMinutes" type="number" min="1" max="30" value="1"><span>นาที</span></div>
+          </div>
         </div>
-      </div>
-      <p class="setting-hint">ครบเวลาแล้ว ระบบจะเปิดข้อถัดไปเอง</p>
+      </section>
+
+      <!-- แท็บต่อเนื่อง: เวลานี้ใช้หลังจบแต่ละข้อในปุ่มทำอัตโนมัติต่อเนื่อง -->
+      <section id="settings-continuous" class="settings-panel" role="tabpanel" hidden>
+        <div class="tab-intro"><strong>ทำต่อทีละข้อโดยอัตโนมัติ</strong><span>ตั้งเวลาทบทวนก่อนเปิดข้อถัดไป</span></div>
+        <div class="continuous-settings">
+          <label class="toggle-setting" for="manualReviewBeforeContinue">
+            <input id="manualReviewBeforeContinue" type="checkbox" checked>
+            <span>ทบทวนหลังแต่ละข้อ</span>
+          </label>
+          <div class="setting-field continuous-review-field"><label for="continuousReviewMinutes">ทบทวน</label>
+            <div class="number-control"><input id="continuousReviewMinutes" type="number" min="1" max="120" value="5"><span>นาที</span></div>
+          </div>
+        </div>
+        <p class="setting-hint">ครบเวลาแล้ว ระบบจะเปิดข้อถัดไปเอง</p>
+      </section>
+
+      <!-- แท็บเกี่ยวกับ: ข้อมูลเวอร์ชัน เครดิต และลิงก์โครงการ -->
+      <section id="settings-about" class="settings-panel" role="tabpanel" hidden>
+        <div class="about-content"><img class="about-icon" src="icons/graduation-cap.png" alt=""><strong>Speexx Helper</strong><p>เวอร์ชัน 1.0.2 · Chrome Extension สำหรับ Speexx Portal</p><p>พัฒนาโดย Mithx และ บักโอม</p><a href="https://github.com/Mithx555/speexx_help" target="_blank" rel="noreferrer">เปิดหน้าโครงการบน GitHub ↗</a></div>
+      </section>
+
       <!-- ปุ่มดำเนินการและข้อความสถานะด้านล่างของหน้าต่าง -->
       <div class="action-buttons">
         <button id="saveBtn" class="btn btn-secondary">บันทึกตั้งค่า</button>
@@ -71,12 +93,6 @@
       <p id="status" class="status" aria-live="polite">เปิดหน้า Speexx Portal เพื่อเริ่มใช้งาน</p>
       <!-- เครดิตผู้จัดทำ -->
       <p class="credits">By Mithx · By บักโอม</p>
-      <!-- เกี่ยวกับ: เก็บเวอร์ชัน เครดิต และลิงก์โครงการไว้ในส่วนพับเพื่อไม่ให้หน้าตั้งค่ายาวขึ้น -->
-      <details class="about-panel">
-        <summary>เกี่ยวกับ Speexx Helper</summary>
-        <p>เวอร์ชัน 1.0.2 · Chrome Extension สำหรับ Speexx Portal</p>
-        <a href="https://github.com/Mithx555/speexx_help" target="_blank" rel="noreferrer">เปิดหน้าโครงการบน GitHub</a>
-      </details>
     </section>
   </main>
   <script src="popup.js"></script>

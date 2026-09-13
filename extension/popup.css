@@ -13,6 +13,18 @@ body { width: 380px; margin: 0; background: #0b1220; color: #f8fafc; }
 .section-icon { display: grid; place-items: center; width: 30px; height: 30px; border-radius: 9px; background: #2e3c62; }
 h2 { margin: 0; font-size: 15px; }
 .section-heading p { margin: 2px 0 0; color: #91a1bd; font-size: 10px; }
+/* แท็บตั้งค่า: แยกการตั้งค่าจำนวนมากเป็นหมวดสั้น ๆ เพื่อให้อ่านง่ายใน Popup */
+.settings-tabs { display:grid; grid-template-columns:repeat(4, 1fr); gap:4px; margin:0 -2px 14px; padding:4px; border-radius:10px; background:#111a2c; }
+.settings-tab { min-height:29px; padding:4px 2px; border:0; border-radius:7px; background:transparent; color:#91a1bd; cursor:pointer; font:inherit; font-size:10px; font-weight:700; }
+.settings-tab:hover { color:#dbeafe; }
+.settings-tab[aria-selected="true"] { background:#40387d; color:#fff; box-shadow:0 3px 9px rgba(79,70,229,.25); }
+.settings-panel { min-height:133px; }
+.tab-intro { display:flex; flex-direction:column; gap:3px; padding:3px 0 12px; }
+.tab-intro strong { color:#f8fafc; font-size:12px; }
+.tab-intro span { color:#91a1bd; font-size:10px; line-height:1.4; }
+.general-note { display:flex; gap:9px; align-items:flex-start; padding:11px; border:1px solid rgba(129,140,248,.25); border-radius:10px; background:rgba(99,102,241,.1); }
+.general-note span { font-size:15px; }
+.general-note p { margin:0; color:#cbd5e1; font-size:10px; line-height:1.5; }
 .section-label { margin: 12px 0 6px; color: #d6e0f2; font-size: 11px; font-weight: 700; }
 label { font-size: 11px; color: #c4d0e5; font-weight: 600; }
 .speed-control { display: flex; align-items: center; gap: 8px; margin: 6px 0 12px; }
@@ -51,11 +63,19 @@ label { font-size: 11px; color: #c4d0e5; font-weight: 600; }
 /* เครดิตผู้จัดทำ: ตั้งใจให้เล็กและอยู่ท้ายหน้าต่างโดยไม่แย่งความสำคัญจากปุ่ม */
 .credits { margin: 5px 0 0; color: #64748b; font-size: 9px; text-align: center; }
 /* ส่วน About พับเก็บได้: แสดงข้อมูลโครงการโดยไม่รบกวนหน้าตั้งค่าหลัก */
-.about-panel { margin-top: 6px; color: #8292ae; font-size: 9px; text-align: center; }
-.about-panel summary { display: inline-block; cursor: pointer; color: #9ca3ff; }
-.about-panel p { margin: 5px 0 2px; }
-.about-panel a { color: #a5b4fc; text-decoration: none; }
-.about-panel a:hover { color: #ddd6fe; text-decoration: underline; }
+/* เนื้อหา About: รวมเวอร์ชัน เครดิต และลิงก์ไว้แท็บเดียวเพื่อไม่ซ้ำกับหน้าตั้งค่าหลัก */
+.about-content { display:flex; min-height:133px; flex-direction:column; align-items:center; justify-content:center; color:#cbd5e1; text-align:center; }
+.about-icon { width:34px; height:34px; margin-bottom:6px; object-fit:contain; }
+.about-content strong { color:#f8fafc; font-size:13px; }
+.about-content p { margin:4px 0 0; color:#91a1bd; font-size:10px; }
+.about-content a { margin-top:9px; color:#a5b4fc; font-size:10px; text-decoration:none; }
+.about-content a:hover { color:#ddd6fe; text-decoration:underline; }
 body[data-theme="light"] { color-scheme: light; background: #eef2ff; color: #172033; }
 body[data-theme="light"] .card { background: #fff; border-color: #d9e0ef; }
 body[data-theme="light"] .setting-field input, body[data-theme="light"] .toggle-setting, body[data-theme="light"] .profile-btn { background: #f7f9fc; color: #172033; border-color: #cbd5e1; }
+body[data-theme="light"] .settings-tabs { background:#eef2ff; }
+body[data-theme="light"] .settings-tab { color:#64748b; }
+body[data-theme="light"] .settings-tab[aria-selected="true"] { color:#fff; }
+body[data-theme="light"] .tab-intro strong, body[data-theme="light"] .about-content strong { color:#172033; }
+body[data-theme="light"] .general-note { background:#eef2ff; border-color:#c7d2fe; }
+body[data-theme="light"] .general-note p { color:#475569; }
