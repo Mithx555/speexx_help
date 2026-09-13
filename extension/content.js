@@ -185,7 +185,7 @@
     document.getElementById('speexx-helper-unsupported-html').addEventListener('click', copySanitizedPageHtml);
     document.getElementById('speexx-helper-update-open').addEventListener('click', () => {
       const url = document.getElementById('speexx-helper-update').dataset.releaseUrl;
-      if (url) chrome.runtime.sendMessage({ action: 'openRelease', url });
+      if (url) sendRuntimeMessage({ action: 'openRelease', url });
     });
     // ปุ่มรีเซ็ตสถิติ: ใช้ได้เฉพาะตอนระบบหยุด เพื่อไม่ให้ข้อมูลของงานที่กำลังทำหายโดยไม่ตั้งใจ
     document.getElementById('speexx-helper-reset-session').addEventListener('click', resetSessionStats);
@@ -287,10 +287,28 @@
     compact.textContent = `${pageText} · ${sessionElapsedMinutes()} นาที`;
   }
 
+  // ส่งข้อความไป background แบบปลอดภัย: หน้าเก่าหลัง Reload Extension จะไม่ throw "context invalidated"
+  function sendRuntimeMessage(message, onResponse) {
+    try {
+      if (!chrome.runtime?.id) throw new Error('Extension context unavailable');
+      chrome.runtime.sendMessage(message, response => {
+        if (chrome.runtime.lastError) {
+          addLog('ส่วนขยายเพิ่งอัปเดต — รีเฟรชหน้า Speexx หนึ่งครั้งก่อนใช้ปุ่มนี้', 'warning');
+          return;
+        }
+        onResponse?.(response);
+      });
+      return true;
+    } catch (_) {
+      addLog('ส่วนขยายเพิ่งอัปเดต — รีเฟรชหน้า Speexx หนึ่งครั้งก่อนใช้ปุ่มนี้', 'warning');
+      return false;
+    }
+  }
+
   // ขอข้อมูล Release ล่าสุดผ่าน background; หากไม่มีอินเทอร์เน็ตหรือไม่มีเวอร์ชันใหม่จะไม่แสดงการ์ด
   function checkForUpdate() {
-    chrome.runtime.sendMessage({ action: 'checkForUpdate' }, response => {
-      if (chrome.runtime.lastError || !response?.ok || !response.updateAvailable) return;
+    sendRuntimeMessage({ action: 'checkForUpdate' }, response => {
+      if (!response?.ok || !response.updateAvailable) return;
       const update = document.getElementById('speexx-helper-update');
       const text = document.getElementById('speexx-helper-update-text');
       if (!update || !text) return;
@@ -711,8 +729,8 @@
       title: `[Bug]: ${getExerciseType() || 'unknown'} — ${location.pathname.split('/').pop() || 'Speexx'}`,
       body: reportBody
     });
-    chrome.runtime.sendMessage({ action: 'openGithubPage', url: `https://github.com/Mithx555/speexx_help/issues/new?${params}` });
-    addLog(copied ? 'เปิด GitHub Issue แล้ว — Debug Report ถูกคัดลอกพร้อมวาง' : 'เปิด GitHub Issue แล้ว — กดคัดลอก Debug หากต้องแนบรายงาน', 'success');
+    const opened = sendRuntimeMessage({ action: 'openGithubPage', url: `https://github.com/Mithx555/speexx_help/issues/new?${params}` });
+    if (opened) addLog(copied ? 'เปิด GitHub Issue แล้ว — Debug Report ถูกคัดลอกพร้อมวาง' : 'เปิด GitHub Issue แล้ว — กดคัดลอก Debug หากต้องแนบรายงาน', 'success');
   }
 
   // ปุ่ม HTML: คัดลอกตามคำสั่งผู้ใช้เท่านั้น และแจ้งให้ตรวจข้อมูลส่วนบุคคลก่อนแชร์ทุกครั้ง
