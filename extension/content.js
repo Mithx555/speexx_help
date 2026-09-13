@@ -86,7 +86,7 @@
             <span class="sh-session-title">สรุปเซสชัน</span><span id="sh-session-completed">✅ 0 ข้อ</span><span id="sh-session-time">⏱ 0 นาที</span><span id="sh-session-reviews">📖 0 ครั้ง</span><button id="speexx-helper-reset-session" class="sh-session-reset" type="button" title="รีเซ็ตสถิติเซสชัน">↺</button>
           </div>
           <!-- Debug Toolkit: ตรวจสภาพหน้า, คัดลอกรายงาน และล้างบันทึกได้จากจุดเดียว -->
-          <div class="sh-debug-heading"><span>Debug Toolkit</span><div class="sh-debug-actions"><button id="speexx-helper-diagnose-page" type="button" title="ตรวจโครงสร้างข้อปัจจุบัน">⌕ ตรวจ</button><button id="speexx-helper-export-debug" type="button" title="คัดลอกรายงาน Debug">⧉ คัดลอก</button><button id="speexx-helper-clear-debug" type="button" title="ล้างบันทึก Debug">↺ ล้าง</button></div></div>
+          <div class="sh-debug-heading"><span>Debug Toolkit</span><div class="sh-debug-actions"><button id="speexx-helper-diagnose-page" type="button" title="ตรวจโครงสร้างข้อปัจจุบัน">⌕ ตรวจ</button><button id="speexx-helper-copy-html" type="button" title="คัดลอก HTML หน้าปัจจุบันแบบปกปิดช่องกรอก">&lt;/&gt; HTML</button><button id="speexx-helper-export-debug" type="button" title="คัดลอกรายงาน Debug">⧉ คัดลอก</button><button id="speexx-helper-clear-debug" type="button" title="ล้างบันทึก Debug">↺ ล้าง</button></div></div>
           <div id="speexx-helper-diagnostic-summary" class="sh-diagnostic-summary">กด “ตรวจ” เพื่อสรุปโครงสร้างข้อปัจจุบัน</div>
           <div id="speexx-helper-log">
             <div class="sh-empty">กดปุ่มด้านล่างเพื่อเริ่มทำแบบฝึกหัด</div>
@@ -153,6 +153,7 @@
     document.getElementById('speexx-helper-export-debug').addEventListener('click', exportDebugReport);
     // เครื่องมือ Debug: ตรวจหน้าและล้างเฉพาะบันทึกในหน่วยความจำ ไม่กระทบคำตอบหรือการตั้งค่า
     document.getElementById('speexx-helper-diagnose-page').addEventListener('click', diagnoseCurrentPage);
+    document.getElementById('speexx-helper-copy-html').addEventListener('click', copySanitizedPageHtml);
     document.getElementById('speexx-helper-clear-debug').addEventListener('click', clearDebugLog);
     // ปุ่มรีเซ็ตสถิติ: ใช้ได้เฉพาะตอนระบบหยุด เพื่อไม่ให้ข้อมูลของงานที่กำลังทำหายโดยไม่ตั้งใจ
     document.getElementById('speexx-helper-reset-session').addEventListener('click', resetSessionStats);
@@ -532,6 +533,31 @@
       }
     }
     addLog('📋 คัดลอกรายงาน Debug แล้ว — วางส่งเพื่อแจ้งปัญหาได้เลย', 'success');
+  }
+
+  // สร้าง HTML สำหรับการวิเคราะห์: เก็บโครงสร้างหน้าไว้ แต่ล้างค่าที่ผู้ใช้อาจกรอกและตัด UI ของส่วนขยายออก
+  function buildSanitizedPageHtml() {
+    const pageCopy = document.documentElement.cloneNode(true);
+    pageCopy.querySelectorAll('script, style, noscript, #speexx-helper-panel, #speexx-helper-reopen, #speexx-helper-floating-timer').forEach(node => node.remove());
+    pageCopy.querySelectorAll('input, textarea, select').forEach(field => {
+      field.removeAttribute('value');
+      field.removeAttribute('checked');
+      field.removeAttribute('selected');
+      if (field.tagName === 'TEXTAREA') field.textContent = '';
+      if (field.tagName === 'SELECT') field.selectedIndex = -1;
+    });
+    return `<!-- Speexx Helper sanitized HTML | ${new Date().toISOString()} | ${location.href} -->\n<!DOCTYPE html>\n${pageCopy.outerHTML}`;
+  }
+
+  // ปุ่ม HTML: คัดลอกตามคำสั่งผู้ใช้เท่านั้น และแจ้งให้ตรวจข้อมูลส่วนบุคคลก่อนแชร์ทุกครั้ง
+  async function copySanitizedPageHtml() {
+    const html = buildSanitizedPageHtml();
+    try {
+      await navigator.clipboard.writeText(html);
+      addLog(`คัดลอก HTML หน้าเว็บแล้ว (${Math.round(html.length / 1024)} KB) — ตรวจข้อมูลส่วนบุคคลก่อนแชร์`, 'success');
+    } catch (_) {
+      addLog('คัดลอก HTML หน้าเว็บไม่สำเร็จ', 'error');
+    }
   }
 
   // Persist task progress so the popup can show it
