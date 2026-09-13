@@ -160,6 +160,13 @@
 .sh-debug-actions button { padding:3px 5px; border:1px solid rgba(129,140,248,.35); border-radius:6px; background:rgba(99,102,241,.14); color:#c7d2fe; cursor:pointer; font:inherit; font-size:10px; }
 .sh-debug-actions button:hover { background:rgba(99,102,241,.28); color:#fff; }
 .sh-diagnostic-summary { margin:5px 12px 0; padding:5px 7px; border-left:2px solid #38bdf8; border-radius:4px; background:rgba(56,189,248,.08); color:#bae6fd; font-size:10px; line-height:1.35; }
+/* การ์ดโจทย์ไม่รองรับ: สีส้มและปุ่มคัดลอกชัดเจนเพื่อรายงานปัญหาได้ทันที */
+.sh-unsupported { margin:7px 12px 0; padding:8px; border:1px solid rgba(251,146,60,.5); border-radius:8px; background:rgba(154,52,18,.18); color:#fed7aa; font-size:10px; }
+.sh-unsupported strong { display:block; color:#fdba74; font-size:11px; }
+.sh-unsupported span { display:block; margin-top:3px; color:#fed7aa; line-height:1.35; }
+.sh-unsupported div { display:flex; gap:5px; margin-top:7px; }
+.sh-unsupported button { flex:1; min-height:27px; border:1px solid rgba(251,146,60,.55); border-radius:6px; background:rgba(251,146,60,.12); color:#ffedd5; cursor:pointer; font:inherit; font-size:10px; font-weight:700; }
+.sh-unsupported button:hover { background:rgba(251,146,60,.28); }
 
 /* ===========================
    Log container
@@ -387,6 +394,7 @@
 
 #speexx-helper-main.sh-debug-hidden .sh-debug-heading { display: none; }
 #speexx-helper-main.sh-debug-hidden .sh-diagnostic-summary { display: none; }
+#speexx-helper-main.sh-debug-hidden .sh-unsupported { display: none; }
 
 #speexx-helper-main.sh-minimized {
   width: auto !important;

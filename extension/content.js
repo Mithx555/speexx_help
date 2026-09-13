@@ -42,6 +42,8 @@
   const debugEntries = [];
   // ผลตรวจหน้าล่าสุด: เก็บไว้รวมใน Debug report เพื่อวิเคราะห์โดยไม่ต้องขอ HTML เพิ่ม
   let latestPageDiagnostics = null;
+  // ป้องกันการเพิ่ม log “ไม่รองรับ” ซ้ำระหว่างหน้า Speexx กำลัง re-render
+  let unsupportedNoticeSignature = '';
   // Snapshot ก่อนเริ่มใส่คำตอบ: ใช้เทียบกับ DOM หลังเกิดปัญหาโดยไม่ต้องขอ HTML เพิ่ม
   let preApplyExerciseSnapshot = null;
   const pendingSleepCancellers = new Set();
@@ -88,6 +90,12 @@
           <!-- Debug Toolkit: ตรวจสภาพหน้า, คัดลอกรายงาน และล้างบันทึกได้จากจุดเดียว -->
           <div class="sh-debug-heading"><span>Debug Toolkit</span><div class="sh-debug-actions"><button id="speexx-helper-diagnose-page" type="button" title="ตรวจโครงสร้างข้อปัจจุบัน">⌕ ตรวจ</button><button id="speexx-helper-copy-html" type="button" title="คัดลอก HTML หน้าปัจจุบันแบบปกปิดช่องกรอก">&lt;/&gt; HTML</button><button id="speexx-helper-export-debug" type="button" title="คัดลอกรายงาน Debug">⧉ คัดลอก</button><button id="speexx-helper-clear-debug" type="button" title="ล้างบันทึก Debug">↺ ล้าง</button></div></div>
           <div id="speexx-helper-diagnostic-summary" class="sh-diagnostic-summary">กด “ตรวจ” เพื่อสรุปโครงสร้างข้อปัจจุบัน</div>
+          <!-- แจ้งโจทย์ที่ไม่รองรับ: ให้ส่งข้อมูลที่จำเป็นได้จากการ์ดเดียวทันที -->
+          <div id="speexx-helper-unsupported" class="sh-unsupported" hidden>
+            <strong>⚠️ ยังไม่รองรับโจทย์นี้</strong>
+            <span id="speexx-helper-unsupported-detail">ตรวจพบชนิด: unknown</span>
+            <div><button id="speexx-helper-unsupported-debug" type="button">⧉ คัดลอก Debug</button><button id="speexx-helper-unsupported-html" type="button">&lt;/&gt; คัดลอก HTML</button></div>
+          </div>
           <div id="speexx-helper-log">
             <div class="sh-empty">กดปุ่มด้านล่างเพื่อเริ่มทำแบบฝึกหัด</div>
           </div>
@@ -168,6 +176,8 @@
     document.getElementById('speexx-helper-diagnose-page').addEventListener('click', diagnoseCurrentPage);
     document.getElementById('speexx-helper-copy-html').addEventListener('click', copySanitizedPageHtml);
     document.getElementById('speexx-helper-clear-debug').addEventListener('click', clearDebugLog);
+    document.getElementById('speexx-helper-unsupported-debug').addEventListener('click', exportDebugReport);
+    document.getElementById('speexx-helper-unsupported-html').addEventListener('click', copySanitizedPageHtml);
     // ปุ่มรีเซ็ตสถิติ: ใช้ได้เฉพาะตอนระบบหยุด เพื่อไม่ให้ข้อมูลของงานที่กำลังทำหายโดยไม่ตั้งใจ
     document.getElementById('speexx-helper-reset-session').addEventListener('click', resetSessionStats);
 
@@ -211,6 +221,9 @@
 
     makeDraggable(document.getElementById('speexx-helper-header'));
     updateSessionSummary();
+    // Speexx อาจสร้างโจทย์ช้าหลังหน้าโหลด จึงตรวจซ้ำอีกครั้งเพื่อให้การ์ดแจ้งเตือนปรากฏทันเวลา
+    setTimeout(refreshUnsupportedExerciseNotice, 700);
+    setTimeout(refreshUnsupportedExerciseNotice, 2200);
   }
 
   // ============================================================
@@ -512,6 +525,25 @@
       return;
     }
     addLog(`ตรวจหน้า: ${typeLabel} · ${controlText} · ช่อง ${diagnostic.fields.gaps}`, 'success');
+  }
+
+  // แสดงการ์ดช่วยรายงานเฉพาะเมื่อพบ exercise แต่ตัวตรวจชนิดยังระบุไม่ได้
+  function refreshUnsupportedExerciseNotice() {
+    const card = document.getElementById('speexx-helper-unsupported');
+    const detail = document.getElementById('speexx-helper-unsupported-detail');
+    const exercise = findExercise();
+    const type = getExerciseType();
+    const unsupported = Boolean(exercise) && (!type || type === 'unknown');
+    if (card) card.hidden = !unsupported;
+    if (!unsupported) {
+      unsupportedNoticeSignature = '';
+      return;
+    }
+    const signature = getExerciseSignature() || `${location.pathname}:${String(exercise.className || '')}`;
+    if (detail) detail.textContent = `ตรวจพบชนิด: ${type || 'unknown'} · กดคัดลอกเพื่อส่งให้ผู้พัฒนา`;
+    if (unsupportedNoticeSignature === signature) return;
+    unsupportedNoticeSignature = signature;
+    addLog('ไม่รองรับโจทย์นี้ — ใช้ปุ่มคัดลอก Debug หรือ HTML เพื่อส่งข้อมูลแก้ไข', 'warning');
   }
 
   // ปุ่ม “ล้าง”: ล้างเฉพาะเหตุการณ์ Debug บนหน้านี้ แล้วคงข้อความยืนยันหนึ่งรายการไว้
@@ -1152,6 +1184,7 @@
 
     const type = getExerciseType();
     addLog(`📋 พบแบบฝึกหัด: ${type} (หน้าที่ ${currentPage})`, 'info');
+    refreshUnsupportedExerciseNotice();
 
     if (!type || type === 'unknown') {
       addLog('⚠️ ไม่รู้จักประเภทแบบฝึกหัด - ข้ามไป', 'warning');
