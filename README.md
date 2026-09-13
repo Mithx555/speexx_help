@@ -36,7 +36,7 @@ Chrome Extension สำหรับช่วยจัดการแบบฝึ
 
 ## เวอร์ชันและการทดสอบ
 
-- เวอร์ชันปัจจุบัน: **1.0.5** — ดูรายการเปลี่ยนแปลงใน [CHANGELOG.md](CHANGELOG.md)
+- เวอร์ชันปัจจุบัน: **1.0.6** — ดูรายการเปลี่ยนแปลงใน [CHANGELOG.md](CHANGELOG.md)
 - ก่อนออกเวอร์ชันใหม่ ให้รัน `./scripts/validate-extension.ps1` ใน PowerShell
 - รายการทดสอบแบบฝึกหัดและโหมดเวลามีใน [TESTING.md](TESTING.md)
 
