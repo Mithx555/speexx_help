@@ -134,6 +134,19 @@
     document.body.appendChild(floatingTimer);
 
     const mainPanel = document.getElementById('speexx-helper-main');
+    // ตั้งค่าหน้าตาแผงลอยจาก Popup ทุกครั้งที่สร้าง และฟังการเปลี่ยนค่าเพื่ออัปเดตโดยไม่ต้องรีเฟรชหน้า
+    const applyPanelAppearance = ({ uiAccent = 'violet', panelSize = 'normal' }) => {
+      mainPanel.dataset.uiAccent = ['violet', 'blue', 'green', 'rose'].includes(uiAccent) ? uiAccent : 'violet';
+      mainPanel.dataset.panelSize = ['compact', 'normal', 'large'].includes(panelSize) ? panelSize : 'normal';
+    };
+    chrome.storage.sync.get(['uiAccent', 'panelSize'], applyPanelAppearance);
+    chrome.storage.onChanged.addListener((changes, areaName) => {
+      if (areaName !== 'sync' || (!changes.uiAccent && !changes.panelSize)) return;
+      applyPanelAppearance({
+        uiAccent: changes.uiAccent?.newValue ?? mainPanel.dataset.uiAccent,
+        panelSize: changes.panelSize?.newValue ?? mainPanel.dataset.panelSize
+      });
+    });
     const debugToggleBtn = document.getElementById('speexx-helper-toggle-debug');
     const setDebugVisibility = (hidden) => {
       mainPanel.classList.toggle('sh-debug-hidden', hidden);

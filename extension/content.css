@@ -369,6 +369,13 @@
   display: none;
 }
 
+/* หน้าตาที่ผู้ใช้เลือกจาก Popup: เปลี่ยนสีหัวแผงและขนาดโดยไม่กระทบระบบทำงาน */
+#speexx-helper-main[data-ui-accent="blue"] #speexx-helper-header { background:linear-gradient(90deg,#0284c7 0%,#38bdf8 100%); }
+#speexx-helper-main[data-ui-accent="green"] #speexx-helper-header { background:linear-gradient(90deg,#047857 0%,#34d399 100%); }
+#speexx-helper-main[data-ui-accent="rose"] #speexx-helper-header { background:linear-gradient(90deg,#be123c 0%,#fb7185 100%); }
+#speexx-helper-main[data-panel-size="compact"] { zoom:.9; }
+#speexx-helper-main[data-panel-size="large"] { zoom:1.1; }
+
 #speexx-helper-main.sh-debug-hidden .sh-debug-heading { display: none; }
 #speexx-helper-main.sh-debug-hidden .sh-diagnostic-summary { display: none; }
 

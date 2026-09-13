@@ -29,6 +29,7 @@
         <button class="settings-tab" type="button" role="tab" aria-selected="true" aria-controls="settings-general" data-tab="general">ทั่วไป</button>
         <button class="settings-tab" type="button" role="tab" aria-selected="false" aria-controls="settings-timed" data-tab="timed">จับเวลา</button>
         <button class="settings-tab" type="button" role="tab" aria-selected="false" aria-controls="settings-continuous" data-tab="continuous">ต่อเนื่อง</button>
+        <button class="settings-tab" type="button" role="tab" aria-selected="false" aria-controls="settings-appearance" data-tab="appearance">หน้าตา</button>
         <button class="settings-tab" type="button" role="tab" aria-selected="false" aria-controls="settings-about" data-tab="about">เกี่ยวกับ</button>
       </div>
 
@@ -76,6 +77,24 @@
           </div>
         </div>
         <p class="setting-hint">ครบเวลาแล้ว ระบบจะเปิดข้อถัดไปเอง</p>
+      </section>
+
+      <!-- แท็บหน้าตา: ผู้ใช้เลือกสีเน้นและขนาดแผงลอย โดยค่าเก็บใน Chrome Sync -->
+      <section id="settings-appearance" class="settings-panel" role="tabpanel" hidden>
+        <div class="tab-intro"><strong>ปรับหน้าตาให้เหมาะกับคุณ</strong><span>มีผลกับหน้าตั้งค่าและแผง Speexx Helper</span></div>
+        <div class="section-label">สีเน้น</div>
+        <div class="appearance-options" role="group" aria-label="เลือกสีเน้น">
+          <button class="appearance-choice accent-choice" type="button" data-accent="violet" aria-pressed="true"><i class="accent-dot accent-violet"></i>ม่วง</button>
+          <button class="appearance-choice accent-choice" type="button" data-accent="blue" aria-pressed="false"><i class="accent-dot accent-blue"></i>ฟ้า</button>
+          <button class="appearance-choice accent-choice" type="button" data-accent="green" aria-pressed="false"><i class="accent-dot accent-green"></i>เขียว</button>
+          <button class="appearance-choice accent-choice" type="button" data-accent="rose" aria-pressed="false"><i class="accent-dot accent-rose"></i>ชมพู</button>
+        </div>
+        <div class="section-label">ขนาดแผง Speexx</div>
+        <div class="appearance-options panel-size-options" role="group" aria-label="เลือกขนาดแผง Speexx">
+          <button class="appearance-choice size-choice" type="button" data-panel-size="compact" aria-pressed="false">เล็ก</button>
+          <button class="appearance-choice size-choice" type="button" data-panel-size="normal" aria-pressed="true">ปกติ</button>
+          <button class="appearance-choice size-choice" type="button" data-panel-size="large" aria-pressed="false">ใหญ่</button>
+        </div>
       </section>
 
       <!-- แท็บเกี่ยวกับ: ข้อมูลเวอร์ชัน เครดิต และลิงก์โครงการ -->

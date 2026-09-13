@@ -14,6 +14,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   const manualReviewBeforeContinue = document.getElementById('manualReviewBeforeContinue');
   const continuousReviewMinutes = document.getElementById('continuousReviewMinutes');
   const profileButtons = Array.from(document.querySelectorAll('.profile-btn'));
+  const accentButtons = Array.from(document.querySelectorAll('.accent-choice'));
+  const panelSizeButtons = Array.from(document.querySelectorAll('.size-choice'));
   // ระบบแท็บ: data-tab ของปุ่มต้องตรงกับ suffix ใน id "settings-..." ของแต่ละ panel
   const settingsTabs = Array.from(document.querySelectorAll('.settings-tab'));
   const settingsPanels = Array.from(document.querySelectorAll('.settings-panel'));
@@ -38,7 +40,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   };
   settingsTabs.forEach(tab => tab.addEventListener('click', () => selectSettingsTab(tab.dataset.tab)));
   const { theme = 'dark' } = await chrome.storage.sync.get(['theme']);
-  const timedSettings = await chrome.storage.sync.get(['questionMinutes', 'reviewMinutes', 'reminderMinutes', 'activeTimeProfile', 'manualReviewBeforeContinue', 'continuousReviewMinutes']);
+  const timedSettings = await chrome.storage.sync.get(['questionMinutes', 'reviewMinutes', 'reminderMinutes', 'activeTimeProfile', 'manualReviewBeforeContinue', 'continuousReviewMinutes', 'uiAccent', 'panelSize']);
   speedSlider.value = normalizeMinutes(timedSettings.questionMinutes); speedValue.value = speedSlider.value;
   reviewMinutes.value = Math.min(120, Math.max(1, Number.parseInt(timedSettings.reviewMinutes, 10) || 2));
   reminderMinutes.value = normalizeReminderMinutes(timedSettings.reminderMinutes);
@@ -60,6 +62,27 @@ document.addEventListener('DOMContentLoaded', async () => {
   };
   detectProfile();
   document.body.dataset.theme = theme; themeToggleBtn.textContent = theme === 'dark' ? '🌙' : '☀️';
+  // การตั้งค่าหน้าตา: เปลี่ยน preview ใน Popup ทันที และใช้ค่าเดียวกันกับแผงลอยบน Speexx
+  let uiAccent = ['violet', 'blue', 'green', 'rose'].includes(timedSettings.uiAccent) ? timedSettings.uiAccent : 'violet';
+  let panelSize = ['compact', 'normal', 'large'].includes(timedSettings.panelSize) ? timedSettings.panelSize : 'normal';
+  const renderAppearance = () => {
+    document.body.dataset.accent = uiAccent;
+    accentButtons.forEach(button => button.setAttribute('aria-pressed', String(button.dataset.accent === uiAccent)));
+    panelSizeButtons.forEach(button => button.setAttribute('aria-pressed', String(button.dataset.panelSize === panelSize)));
+  };
+  renderAppearance();
+  accentButtons.forEach(button => button.addEventListener('click', async () => {
+    uiAccent = button.dataset.accent;
+    renderAppearance();
+    await chrome.storage.sync.set({ uiAccent });
+    showStatus('บันทึกสีเน้นแล้ว', 'success');
+  }));
+  panelSizeButtons.forEach(button => button.addEventListener('click', async () => {
+    panelSize = button.dataset.panelSize;
+    renderAppearance();
+    await chrome.storage.sync.set({ panelSize });
+    showStatus('บันทึกขนาดแผงแล้ว', 'success');
+  }));
   speedSlider.addEventListener('input', () => { speedValue.value = speedSlider.value; });
   profileButtons.forEach(button => button.addEventListener('click', async () => {
     const profile = timeProfiles[button.dataset.profile];
@@ -90,7 +113,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const continuousReviewTime = normalizeContinuousReviewMinutes(continuousReviewMinutes.value);
     continuousReviewMinutes.value = continuousReviewTime;
     detectProfile();
-    await chrome.storage.sync.set({ questionMinutes: questionTime, reviewMinutes: reviewTime, reminderMinutes: reminderTime, activeTimeProfile: activeProfile, manualReviewBeforeContinue: manualReviewBeforeContinue.checked, continuousReviewMinutes: continuousReviewTime });
+    await chrome.storage.sync.set({ questionMinutes: questionTime, reviewMinutes: reviewTime, reminderMinutes: reminderTime, activeTimeProfile: activeProfile, manualReviewBeforeContinue: manualReviewBeforeContinue.checked, continuousReviewMinutes: continuousReviewTime, uiAccent, panelSize });
     showStatus('บันทึกตั้งค่าแล้ว', 'success');
   });
   // ปุ่มรีเซ็ต: คืนเฉพาะค่าการทำงานในหน้า Settings กลับเป็นค่าเริ่มต้น
@@ -101,9 +124,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     manualReviewBeforeContinue.checked = true;
     continuousReviewMinutes.value = 5;
     activeProfile = '';
+    uiAccent = 'violet';
+    panelSize = 'normal';
     syncContinuousReviewState();
     renderProfile();
-    await chrome.storage.sync.remove(['questionMinutes', 'reviewMinutes', 'reminderMinutes', 'activeTimeProfile', 'manualReviewBeforeContinue', 'continuousReviewMinutes']);
+    renderAppearance();
+    await chrome.storage.sync.remove(['questionMinutes', 'reviewMinutes', 'reminderMinutes', 'activeTimeProfile', 'manualReviewBeforeContinue', 'continuousReviewMinutes', 'uiAccent', 'panelSize']);
     showStatus('รีเซ็ตการตั้งค่าเป็นค่าเริ่มต้นแล้ว', 'success');
   });
   // ไม่มีปุ่มเริ่มใน Popup: ผู้ใช้เลือกโหมดจากแผงลอยบนหน้า Speexx เพื่อเห็นสถานะก่อนเริ่มเสมอ
