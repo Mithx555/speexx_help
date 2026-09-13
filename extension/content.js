@@ -301,7 +301,8 @@
     element.onmousedown = dragMouseDown;
 
     function dragMouseDown(e) {
-      if (e.target.tagName === 'BUTTON' || e.target.tagName === 'SPAN') return;
+      // หัวข้อเป็น span จึงต้องลากได้; ยกเว้นเฉพาะ control ที่ผู้ใช้ต้องกดจริง ๆ
+      if (e.target.closest('button, a, input, select, textarea, label')) return;
       e.preventDefault();
       pos3 = e.clientX;
       pos4 = e.clientY;
