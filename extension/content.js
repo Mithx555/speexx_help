@@ -342,6 +342,16 @@
     let dragState = null;
     let animationFrame = null;
 
+    // ใช้จุดเดียวในการวางตำแหน่ง เพื่อให้ pointerup ที่เกิดก่อน frame สุดท้ายไม่ทำให้ตำแหน่งค้าง
+    const renderDragPosition = () => {
+      if (!dragState) return;
+      const panel = element.parentElement;
+      const deltaX = (dragState.currentX - dragState.startX) / dragState.zoom;
+      const deltaY = (dragState.currentY - dragState.startY) / dragState.zoom;
+      panel.style.left = `${dragState.startLeft + deltaX}px`;
+      panel.style.top = `${dragState.startTop + deltaY}px`;
+    };
+
     // ใช้ Pointer Events และวาดตำแหน่งผ่าน requestAnimationFrame เพื่อให้ลากลื่นแม้หน้าเว็บมีงานหนัก
     element.addEventListener('pointerdown', event => {
       if (event.button !== 0 || event.target.closest('button, a, input, select, textarea, label')) return;
@@ -371,11 +381,7 @@
       if (animationFrame !== null) return;
       animationFrame = requestAnimationFrame(() => {
         if (!dragState) return;
-        const panel = element.parentElement;
-        const deltaX = (dragState.currentX - dragState.startX) / dragState.zoom;
-        const deltaY = (dragState.currentY - dragState.startY) / dragState.zoom;
-        panel.style.left = `${dragState.startLeft + deltaX}px`;
-        panel.style.top = `${dragState.startTop + deltaY}px`;
+        renderDragPosition();
         animationFrame = null;
       });
       event.preventDefault();
@@ -383,17 +389,28 @@
 
     // บันทึกครั้งเดียวเมื่อวางเมาส์ แทนการเขียน Chrome Storage ทุก frame ที่ลาก
     const finishDragging = event => {
-      if (!dragState || event.pointerId !== dragState.pointerId) return;
+      // window blur ไม่มี pointerId จึงใช้เพื่อปลดการลากฉุกเฉินได้
+      if (!dragState || (event?.pointerId !== undefined && event.pointerId !== dragState.pointerId)) return;
+      if (Number.isFinite(event?.clientX) && Number.isFinite(event?.clientY)) {
+        dragState.currentX = event.clientX;
+        dragState.currentY = event.clientY;
+        renderDragPosition();
+      }
       if (animationFrame !== null) cancelAnimationFrame(animationFrame);
       const panel = element.parentElement;
       panel.style.willChange = '';
       chrome.storage.local.set({ speexxPanelPosition: { top: panel.offsetTop, left: panel.offsetLeft } });
-      try { element.releasePointerCapture(event.pointerId); } catch (_) { /* pointer อาจถูกปล่อยไปแล้ว */ }
+      const pointerId = dragState.pointerId;
       dragState = null;
       animationFrame = null;
+      try { element.releasePointerCapture(pointerId); } catch (_) { /* pointer อาจถูกปล่อยไปแล้ว */ }
     };
     element.addEventListener('pointerup', finishDragging);
     element.addEventListener('pointercancel', finishDragging);
+    // สำรองเหตุการณ์: mouseup นอกแผง, capture หลุด, หรือหน้าต่างเสียโฟกัสต้องปลดสถานะลากเสมอ
+    document.addEventListener('pointerup', finishDragging);
+    element.addEventListener('lostpointercapture', finishDragging);
+    window.addEventListener('blur', () => finishDragging());
   }
 
   // แปลงข้อความภายในให้เป็นภาษาที่อ่านง่ายในแผงรายละเอียด
