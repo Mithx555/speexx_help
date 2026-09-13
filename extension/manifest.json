@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Speexx Helper",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "ช่วยทำแบบฝึกหัดใน Speexx Portal อัตโนมัติ",
   "icons": {
     "16": "icons/graduation-cap.png",
@@ -10,7 +10,7 @@
     "128": "icons/graduation-cap.png"
   },
   "permissions": ["storage", "activeTab", "scripting"],
-  "host_permissions": ["https://portal.speexx.com/*"],
+  "host_permissions": ["https://portal.speexx.com/*", "https://api.github.com/*"],
   "action": {
     "default_popup": "popup.html",
     "default_icon": {

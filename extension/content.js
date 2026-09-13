@@ -71,7 +71,7 @@
     logPanel.innerHTML = `
       <div id="speexx-helper-main">
         <div id="speexx-helper-header">
-          <div class="sh-heading"><span class="sh-title"><img class="sh-brand-icon" src="${brandIconUrl}" alt="" aria-hidden="true">Speexx Helper</span><span id="speexx-helper-status" class="sh-status">พร้อมใช้งาน</span><span id="speexx-helper-timer" class="sh-timer" hidden></span></div>
+          <div class="sh-heading"><span class="sh-title"><img class="sh-brand-icon" src="${brandIconUrl}" alt="" aria-hidden="true">Speexx Helper</span><span id="speexx-helper-status" class="sh-status">พร้อมใช้งาน</span><span id="speexx-helper-compact-status" class="sh-compact-status">พร้อมเริ่ม</span><span id="speexx-helper-timer" class="sh-timer" hidden></span></div>
           <div class="sh-controls">
             <button id="speexx-helper-toggle-debug" type="button" title="ซ่อน Debug" aria-pressed="false">⌘</button>
             <button id="speexx-helper-minimize" type="button" title="ย่อ/ขยาย">−</button>
@@ -96,6 +96,8 @@
             <span id="speexx-helper-unsupported-detail">ตรวจพบชนิด: unknown</span>
             <div><button id="speexx-helper-unsupported-debug" type="button">⧉ คัดลอก Debug</button><button id="speexx-helper-unsupported-html" type="button">&lt;/&gt; คัดลอก HTML</button></div>
           </div>
+          <!-- แจ้งอัปเดต: แสดงเฉพาะเมื่อ GitHub มี Release ใหม่กว่าเวอร์ชันที่ติดตั้ง -->
+          <div id="speexx-helper-update" class="sh-update" hidden><span id="speexx-helper-update-text">มีเวอร์ชันใหม่</span><button id="speexx-helper-update-open" type="button">ดูอัปเดต</button></div>
           <div id="speexx-helper-log">
             <div class="sh-empty">กดปุ่มด้านล่างเพื่อเริ่มทำแบบฝึกหัด</div>
           </div>
@@ -178,6 +180,10 @@
     document.getElementById('speexx-helper-clear-debug').addEventListener('click', clearDebugLog);
     document.getElementById('speexx-helper-unsupported-debug').addEventListener('click', exportDebugReport);
     document.getElementById('speexx-helper-unsupported-html').addEventListener('click', copySanitizedPageHtml);
+    document.getElementById('speexx-helper-update-open').addEventListener('click', () => {
+      const url = document.getElementById('speexx-helper-update').dataset.releaseUrl;
+      if (url) chrome.runtime.sendMessage({ action: 'openRelease', url });
+    });
     // ปุ่มรีเซ็ตสถิติ: ใช้ได้เฉพาะตอนระบบหยุด เพื่อไม่ให้ข้อมูลของงานที่กำลังทำหายโดยไม่ตั้งใจ
     document.getElementById('speexx-helper-reset-session').addEventListener('click', resetSessionStats);
 
@@ -221,6 +227,7 @@
 
     makeDraggable(document.getElementById('speexx-helper-header'));
     updateSessionSummary();
+    checkForUpdate();
     // Speexx อาจสร้างโจทย์ช้าหลังหน้าโหลด จึงตรวจซ้ำอีกครั้งเพื่อให้การ์ดแจ้งเตือนปรากฏทันเวลา
     setTimeout(refreshUnsupportedExerciseNotice, 700);
     setTimeout(refreshUnsupportedExerciseNotice, 2200);
@@ -243,6 +250,28 @@
     completed.textContent = `✅ ${sessionStats.completedCount} ข้อ`;
     elapsed.textContent = `⏱ ${sessionElapsedMinutes()} นาที`;
     reviews.textContent = `📖 ${sessionStats.reviewCount} ครั้ง`;
+    updateCompactStatus();
+  }
+
+  // สถานะย่อ: แสดงเฉพาะตอนย่อแผง เพื่อเห็นข้อปัจจุบันและเวลารวมโดยไม่ต้องขยายกลับ
+  function updateCompactStatus() {
+    const compact = document.getElementById('speexx-helper-compact-status');
+    if (!compact) return;
+    const pageText = isRunning ? `ข้อ ${currentPage || 1}` : 'พร้อมเริ่ม';
+    compact.textContent = `${pageText} · ${sessionElapsedMinutes()} นาที`;
+  }
+
+  // ขอข้อมูล Release ล่าสุดผ่าน background; หากไม่มีอินเทอร์เน็ตหรือไม่มีเวอร์ชันใหม่จะไม่แสดงการ์ด
+  function checkForUpdate() {
+    chrome.runtime.sendMessage({ action: 'checkForUpdate' }, response => {
+      if (chrome.runtime.lastError || !response?.ok || !response.updateAvailable) return;
+      const update = document.getElementById('speexx-helper-update');
+      const text = document.getElementById('speexx-helper-update-text');
+      if (!update || !text) return;
+      update.dataset.releaseUrl = response.url;
+      text.textContent = `มีเวอร์ชันใหม่ ${response.version} พร้อมดาวน์โหลด`;
+      update.hidden = false;
+    });
   }
 
   function saveSessionStats() {
@@ -444,6 +473,7 @@
       const progressStatus = document.getElementById('speexx-helper-progress');
       if (currentStatus) currentStatus.textContent = cleanText || 'กำลังทำงาน';
       if (progressStatus) progressStatus.textContent = isRunning ? `กำลังทำ · ข้อ ${currentPage}` : 'พร้อมใช้งาน';
+      updateCompactStatus();
     }
 
     // Sync latest status to storage so popup can display it
