@@ -39,6 +39,7 @@
   cursor: move;
   user-select: none;
   flex-shrink: 0;
+  touch-action: none;
 }
 
 #speexx-helper-header .sh-title {

@@ -297,36 +297,61 @@
   }
 
   function makeDraggable(element) {
-    let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
-    element.onmousedown = dragMouseDown;
+    let dragState = null;
+    let animationFrame = null;
 
-    function dragMouseDown(e) {
-      // หัวข้อเป็น span จึงต้องลากได้; ยกเว้นเฉพาะ control ที่ผู้ใช้ต้องกดจริง ๆ
-      if (e.target.closest('button, a, input, select, textarea, label')) return;
-      e.preventDefault();
-      pos3 = e.clientX;
-      pos4 = e.clientY;
-      document.onmouseup = closeDragElement;
-      document.onmousemove = elementDrag;
-    }
-
-    function elementDrag(e) {
-      e.preventDefault();
-      pos1 = pos3 - e.clientX;
-      pos2 = pos4 - e.clientY;
-      pos3 = e.clientX;
-      pos4 = e.clientY;
+    // ใช้ Pointer Events และวาดตำแหน่งผ่าน requestAnimationFrame เพื่อให้ลากลื่นแม้หน้าเว็บมีงานหนัก
+    element.addEventListener('pointerdown', event => {
+      if (event.button !== 0 || event.target.closest('button, a, input, select, textarea, label')) return;
       const panel = element.parentElement;
-      panel.style.top = (panel.offsetTop - pos2) + "px";
-      panel.style.left = (panel.offsetLeft - pos1) + "px";
+      const panelRect = panel.getBoundingClientRect();
+      const zoom = panel.offsetWidth ? panelRect.width / panel.offsetWidth : 1;
+      dragState = {
+        pointerId: event.pointerId,
+        startX: event.clientX,
+        startY: event.clientY,
+        startLeft: panel.offsetLeft,
+        startTop: panel.offsetTop,
+        zoom: Number.isFinite(zoom) && zoom > 0 ? zoom : 1,
+        currentX: event.clientX,
+        currentY: event.clientY
+      };
       panel.style.right = 'auto';
-      chrome.storage.local.set({ speexxPanelPosition: { top: panel.offsetTop, left: panel.offsetLeft } });
-    }
+      panel.style.willChange = 'left, top';
+      element.setPointerCapture(event.pointerId);
+      event.preventDefault();
+    });
 
-    function closeDragElement() {
-      document.onmouseup = null;
-      document.onmousemove = null;
-    }
+    element.addEventListener('pointermove', event => {
+      if (!dragState || event.pointerId !== dragState.pointerId) return;
+      dragState.currentX = event.clientX;
+      dragState.currentY = event.clientY;
+      if (animationFrame !== null) return;
+      animationFrame = requestAnimationFrame(() => {
+        if (!dragState) return;
+        const panel = element.parentElement;
+        const deltaX = (dragState.currentX - dragState.startX) / dragState.zoom;
+        const deltaY = (dragState.currentY - dragState.startY) / dragState.zoom;
+        panel.style.left = `${dragState.startLeft + deltaX}px`;
+        panel.style.top = `${dragState.startTop + deltaY}px`;
+        animationFrame = null;
+      });
+      event.preventDefault();
+    });
+
+    // บันทึกครั้งเดียวเมื่อวางเมาส์ แทนการเขียน Chrome Storage ทุก frame ที่ลาก
+    const finishDragging = event => {
+      if (!dragState || event.pointerId !== dragState.pointerId) return;
+      if (animationFrame !== null) cancelAnimationFrame(animationFrame);
+      const panel = element.parentElement;
+      panel.style.willChange = '';
+      chrome.storage.local.set({ speexxPanelPosition: { top: panel.offsetTop, left: panel.offsetLeft } });
+      try { element.releasePointerCapture(event.pointerId); } catch (_) { /* pointer อาจถูกปล่อยไปแล้ว */ }
+      dragState = null;
+      animationFrame = null;
+    };
+    element.addEventListener('pointerup', finishDragging);
+    element.addEventListener('pointercancel', finishDragging);
   }
 
   // แปลงข้อความภายในให้เป็นภาษาที่อ่านง่ายในแผงรายละเอียด
