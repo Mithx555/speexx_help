@@ -899,6 +899,10 @@
     if (!element || element.disabled || element.classList.contains('disabled')) return false;
     if (element.getAttribute('aria-disabled') === 'true') return false;
 
+    // ไม่ให้ปุ่มของ Speexx Helper เองถูกนับเป็นปุ่มของหน้า Speexx
+    // สำคัญตอนย่อ/ขยายแผง เพราะ DOM ของแผงยังอยู่แม้เนื้อหาถูกซ่อนด้วย CSS
+    if (element.closest('#speexx-helper-panel, #speexx-helper-reopen, #speexx-helper-floating-timer')) return false;
+
     const style = window.getComputedStyle(element);
     return style.display !== 'none' &&
       style.visibility !== 'hidden' &&
@@ -1011,12 +1015,30 @@
       exercise,
       [
         'button.solution',
+        '.action-exercise-button.solution',
+        'a.solution',
         '[data-original-title="Solution"]',
+        '[title="Solution"]',
+        '[aria-label="Solution"]',
+        '[data-tooltip="Solution"]',
         '[aria-label*="เฉลย"]',
         '.glyphicons.magic-wand'
       ],
       text => text === 'solution' || text.includes('solution') || text.includes('เฉลย')
     );
+  }
+
+  // หลังพับจอ/ปลุกเครื่อง หรือย่อแผง หน้า Speexx อาจ re-render ช้ากว่าปกติ
+  // จึงค้นหาปุ่ม Solution ซ้ำจาก DOM ล่าสุดก่อนสรุปว่าไม่มีจริง
+  async function waitForSolutionButton(maxWait = 6000) {
+    const startedAt = Date.now();
+    while (Date.now() - startedAt < maxWait) {
+      throwIfStopRequested();
+      const button = findSolutionButton(findExercise());
+      if (button) return button;
+      await sleep(250);
+    }
+    return null;
   }
 
   function findRepeatButton(exercise = findExercise()) {
@@ -1379,9 +1401,9 @@
 
     // ขั้นตอน 2: กด Solution (magic-wand) เพื่อดูเฉลย
     addLog('📌 ขั้นตอน 2: กด Solution...', 'step');
-    const solutionBtn = findSolutionButton(exercise);
+    const solutionBtn = await waitForSolutionButton();
     if (!solutionBtn) {
-      addLog('❌ ไม่พบปุ่ม Solution ของข้อปัจจุบัน - ยกเลิกเพื่อไม่ให้จำคำตอบผิด', 'error');
+      addLog('❌ ยังไม่พบปุ่ม Solution หลังรอหน้าเว็บพร้อม - ยกเลิกเพื่อไม่ให้จำคำตอบผิด', 'error');
       return;
     }
 
