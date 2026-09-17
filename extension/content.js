@@ -35,6 +35,8 @@
   let logContainer = null;
   let reopenButton = null;
   let floatingTimer = null;
+  // ใช้สร้างเสียงแจ้งเตือนจาก Web Audio โดยไม่ต้องโหลดไฟล์เสียงภายนอก
+  let timerAudioContext = null;
   // สรุปเซสชัน: เก็บใน storage เพื่อให้โหมดต่อเนื่องที่โหลดหน้าใหม่ไม่สูญสถิติ
   let sessionStats = { startedAt: 0, endedAt: 0, completedCount: 0, reviewCount: 0, reviewMs: 0 };
   let sessionSummaryTimer = null;
@@ -4134,6 +4136,7 @@
 
   function showTimerReminder(label, remainingMs) {
     document.getElementById('speexx-helper-timer-reminder')?.remove();
+    playFunnyReminderSound();
     const reminder = document.createElement('div');
     reminder.id = 'speexx-helper-timer-reminder';
     reminder.setAttribute('role', 'alertdialog');
@@ -4142,10 +4145,37 @@
     const message = remainingMs > 0
       ? `เหลือเวลาประมาณ ${minutes} นาที`
       : 'กำลังเปิดชุดแบบฝึกหัดถัดไป';
-    reminder.innerHTML = `<div class="sh-reminder-card"><span aria-hidden="true">⏰</span><div><strong>${remainingMs > 0 ? `${label} ใกล้หมดแล้ว` : label}</strong><p>${message}</p></div><button type="button" aria-label="ปิดการแจ้งเตือน">✕</button></div>`;
+    const title = remainingMs > 0 ? `${label} ใกล้หมดแล้ว!` : label;
+    reminder.innerHTML = `<div class="sh-reminder-card"><span class="sh-reminder-emoji" aria-hidden="true">⏰</span><div><strong>${title}</strong><p>${message} · รีบดูอีกนิด เดี๋ยวหมดเวลาแล้ว!</p></div><button type="button" aria-label="ปิดการแจ้งเตือน">✕</button></div>`;
     reminder.querySelector('button').addEventListener('click', () => reminder.remove());
     document.body.appendChild(reminder);
     setTimeout(() => reminder.remove(), 10000);
+  }
+
+  // เสียง “ติ๊ง-ติ๊ง-ปุ๊ง” สั้น ๆ ให้สะดุดหูแบบสนุก โดยไม่ใช้ไฟล์เสียงหรือสิทธิ์ไมโครโฟน
+  function playFunnyReminderSound() {
+    try {
+      const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+      if (!AudioContextClass) return;
+      timerAudioContext ||= new AudioContextClass();
+      if (timerAudioContext.state === 'suspended') timerAudioContext.resume();
+
+      const startedAt = timerAudioContext.currentTime;
+      [[660, 0], [880, 0.13], [440, 0.28]].forEach(([frequency, offset], index) => {
+        const oscillator = timerAudioContext.createOscillator();
+        const gain = timerAudioContext.createGain();
+        oscillator.type = index === 2 ? 'triangle' : 'sine';
+        oscillator.frequency.setValueAtTime(frequency, startedAt + offset);
+        gain.gain.setValueAtTime(0.0001, startedAt + offset);
+        gain.gain.exponentialRampToValueAtTime(0.16, startedAt + offset + 0.015);
+        gain.gain.exponentialRampToValueAtTime(0.0001, startedAt + offset + 0.12);
+        oscillator.connect(gain).connect(timerAudioContext.destination);
+        oscillator.start(startedAt + offset);
+        oscillator.stop(startedAt + offset + 0.14);
+      });
+    } catch (_) {
+      // เบราว์เซอร์อาจบล็อกเสียงหากหน้าเว็บยังไม่ได้รับ user gesture; popup ยังแสดงตามปกติ
+    }
   }
 
   function waitWithCountdown(ms, label, reminderMs = 0) {

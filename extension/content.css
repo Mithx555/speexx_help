@@ -479,7 +479,7 @@
   left: 50%;
   transform: translateX(-50%);
   width: min(360px, calc(100vw - 32px));
-  animation: sh-reminder-in .2s ease-out;
+  animation: sh-reminder-in .25s ease-out, sh-reminder-wiggle .55s ease-in-out .25s;
 }
 
 .sh-reminder-card {
@@ -487,18 +487,20 @@
   align-items: center;
   gap: 11px;
   padding: 13px;
-  border: 1px solid rgba(251, 191, 36, .72);
+  border: 1px solid rgba(251, 191, 36, .9);
   border-radius: 13px;
-  background: #1e293b;
+  background: linear-gradient(135deg, #312e81, #1e293b 58%);
   color: #f8fafc;
   box-shadow: 0 14px 35px rgba(0, 0, 0, .38);
 }
 
-.sh-reminder-card > span { font-size: 22px; }
-.sh-reminder-card strong { display: block; font-size: 13px; }
+.sh-reminder-emoji { display:inline-block; font-size: 27px; animation:sh-reminder-bounce .8s ease-in-out infinite; }
+.sh-reminder-card strong { display: block; font-size: 14px; }
 .sh-reminder-card p { margin: 3px 0 0; color: #cbd5e1; font-size: 11px; }
 .sh-reminder-card button { margin-left: auto; border: 0; background: transparent; color: #cbd5e1; cursor: pointer; font-size: 16px; }
 @keyframes sh-reminder-in { from { opacity: 0; transform: translate(-50%, -8px); } to { opacity: 1; transform: translate(-50%, 0); } }
+@keyframes sh-reminder-wiggle { 0%,100% { margin-left:0; } 25% { margin-left:-5px; } 75% { margin-left:5px; } }
+@keyframes sh-reminder-bounce { 0%,100% { transform:rotate(-8deg) translateY(0); } 50% { transform:rotate(8deg) translateY(-5px); } }
 
 /* ===========================
    Responsive
