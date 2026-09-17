@@ -37,6 +37,8 @@
   let floatingTimer = null;
   // ใช้สร้างเสียงแจ้งเตือนจาก Web Audio โดยไม่ต้องโหลดไฟล์เสียงภายนอก
   let timerAudioContext = null;
+  // ป้องกัน error หลัง Reload extension: content script เดิมยังอยู่ในหน้าเว็บชั่วคราว
+  let extensionReloadNoticeShown = false;
   // สรุปเซสชัน: เก็บใน storage เพื่อให้โหมดต่อเนื่องที่โหลดหน้าใหม่ไม่สูญสถิติ
   let sessionStats = { startedAt: 0, endedAt: 0, completedCount: 0, reviewCount: 0, reviewMs: 0 };
   let sessionSummaryTimer = null;
@@ -59,6 +61,46 @@
 
   function throwIfStopRequested() {
     if (shouldStop) throw new StopRequestedError();
+  }
+
+  // Chrome จะตัด context ของ content script เก่าหลัง Reload extension ทันที
+  // ฟังก์ชันชุดนี้ทำให้การกดปุ่มเก่าไม่ throw error และบอกวิธีแก้แก่ผู้ใช้แทน
+  function isExtensionContextAvailable() {
+    try {
+      return Boolean(chrome?.runtime?.id);
+    } catch (_) {
+      return false;
+    }
+  }
+
+  function notifyExtensionReloadRequired() {
+    if (extensionReloadNoticeShown) return;
+    extensionReloadNoticeShown = true;
+    const status = document.getElementById('speexx-helper-status');
+    if (status) status.textContent = 'รีเฟรชหน้า Speexx หลัง Reload ส่วนขยาย';
+    if (logContainer) addLog('ℹ️ ส่วนขยายเพิ่ง Reload — กรุณารีเฟรชหน้า Speexx แล้วเริ่มใหม่', 'warning');
+  }
+
+  function safeStorageSet(area, values) {
+    if (!isExtensionContextAvailable()) { notifyExtensionReloadRequired(); return false; }
+    try {
+      chrome.storage[area].set(values);
+      return true;
+    } catch (_) {
+      notifyExtensionReloadRequired();
+      return false;
+    }
+  }
+
+  function safeStorageRemove(area, keys) {
+    if (!isExtensionContextAvailable()) { notifyExtensionReloadRequired(); return false; }
+    try {
+      chrome.storage[area].remove(keys);
+      return true;
+    } catch (_) {
+      notifyExtensionReloadRequired();
+      return false;
+    }
   }
 
   // ============================================================
@@ -172,7 +214,7 @@
       debugToggleBtn.setAttribute('aria-pressed', String(hidden));
       debugToggleBtn.title = hidden ? 'แสดง Debug' : 'ซ่อน Debug';
       debugToggleBtn.textContent = hidden ? '☷' : '⌘';
-      chrome.storage.local.set({ speexxDebugHidden: hidden });
+      safeStorageSet('local', { speexxDebugHidden: hidden });
     };
     chrome.storage.local.get(['speexxDebugHidden'], ({ speexxDebugHidden = true }) => {
       setDebugVisibility(Boolean(speexxDebugHidden));
@@ -217,7 +259,7 @@
     minimizeBtn.addEventListener('click', () => {
       const isMinimized = mainPanel.classList.toggle('sh-minimized');
       minimizeBtn.textContent = isMinimized ? '+' : '−';
-      chrome.storage.local.set({ speexxMinimized: isMinimized });
+      safeStorageSet('local', { speexxMinimized: isMinimized });
     });
 
     // ล็อกตำแหน่ง: ป้องกันการลากโดยไม่ตั้งใจ แต่ยังอนุญาตให้กดรีเซ็ตตำแหน่งได้
@@ -231,14 +273,14 @@
     lockPositionBtn.addEventListener('click', () => {
       const locked = mainPanel.dataset.positionLocked !== 'true';
       setPositionLock(locked);
-      chrome.storage.local.set({ speexxPanelPositionLocked: locked });
+      safeStorageSet('local', { speexxPanelPositionLocked: locked });
     });
     // รีเซ็ตตำแหน่ง: คืน CSS กลับมุมขวาบนและล้างค่าเดิมในเครื่อง
     document.getElementById('speexx-helper-reset-position').addEventListener('click', () => {
       mainPanel.style.top = '10px';
       mainPanel.style.right = '10px';
       mainPanel.style.left = '';
-      chrome.storage.local.remove(['speexxPanelPosition']);
+      safeStorageRemove('local', ['speexxPanelPosition']);
       addLog('รีเซ็ตตำแหน่งแผงไปมุมขวาบนแล้ว', 'success');
     });
 
@@ -337,7 +379,7 @@
 
   function saveSessionStats() {
     updateSessionSummary();
-    chrome.storage.local.set({ speexxSessionStats: sessionStats });
+    safeStorageSet('local', { speexxSessionStats: sessionStats });
   }
 
   async function startNewSession() {
@@ -461,7 +503,7 @@
       if (animationFrame !== null) cancelAnimationFrame(animationFrame);
       const panel = element.parentElement;
       panel.style.willChange = '';
-      chrome.storage.local.set({ speexxPanelPosition: { top: panel.offsetTop, left: panel.offsetLeft } });
+      safeStorageSet('local', { speexxPanelPosition: { top: panel.offsetTop, left: panel.offsetLeft } });
       const pointerId = dragState.pointerId;
       dragState = null;
       animationFrame = null;
@@ -761,19 +803,15 @@
     }
   }
 
-  // Persist task progress so the popup can show it
+  // บันทึกความคืบหน้าไว้ให้ Popup แสดง โดยปลอดภัยแม้ส่วนขยายเพิ่ง Reload
   function syncTaskStatus(latestText, latestType) {
-    try {
-      chrome.storage.local.set({
-        taskCount: exerciseCount,
-        taskPage: currentPage,
-        taskLatest: latestText.slice(0, 140),
-        taskRunning: isRunning,
-        taskLatestType: latestType
-      });
-    } catch (_) {
-      // storage may be unavailable in some contexts; ignore
-    }
+    safeStorageSet('local', {
+      taskCount: exerciseCount,
+      taskPage: currentPage,
+      taskLatest: latestText.slice(0, 140),
+      taskRunning: isRunning,
+      taskLatestType: latestType
+    });
   }
 
   function setButtonState(running) {
@@ -798,9 +836,7 @@
     }
 
     // Keep popup in sync about running state
-    try {
-      chrome.storage.local.set({ taskRunning: running });
-    } catch (_) { }
+    safeStorageSet('local', { taskRunning: running });
   }
 
   function stopSolving() {
@@ -812,7 +848,7 @@
     setButtonState(false);
     // ยกเลิก sleep ที่กำลังรออยู่ทันที ไม่ต้องรอ timeout เดิม
     Array.from(pendingSleepCancellers).forEach(cancel => cancel());
-    chrome.storage.local.remove(['speexxResumeContinuous']);
+    safeStorageRemove('local', ['speexxResumeContinuous']);
     addLog('⏹ กำลังหยุด...', 'warning');
   }
 
@@ -1135,11 +1171,11 @@
     showTimerReminder('กำลังเปิดชุดใหม่', 0);
     // ปุ่มนี้อาจเปลี่ยนหน้าเต็มหน้า ทำให้ Content Script ปัจจุบันถูกทำลาย
     // เก็บสถานะไว้เพื่อให้ script ของหน้าใหม่เริ่มโหมดต่อเนื่องต่อเอง
-    chrome.storage.local.set({ speexxResumeContinuous: true });
+    safeStorageSet('local', { speexxResumeContinuous: true });
     continueButton.click();
     const nextExerciseReady = await waitForNextExercise(previousSignature);
     if (!nextExerciseReady) return false;
-    chrome.storage.local.remove(['speexxResumeContinuous']);
+    safeStorageRemove('local', ['speexxResumeContinuous']);
     currentPage = 1;
     courseTransitionCount++;
     addLog('🚀 หน้าใหม่พร้อม — เริ่ม Correction อัตโนมัติ', 'step');
@@ -1268,7 +1304,7 @@
     } else {
       addLog('✅ เสร็จสิ้น!', 'success');
     }
-    if (continuous) chrome.storage.local.remove(['speexxResumeContinuous']);
+    if (continuous) safeStorageRemove('local', ['speexxResumeContinuous']);
     addLog(`📊 สรุป: สำเร็จ ${exerciseCount - runStartCount} ข้อ · ข้าม ${skippedCount} · ผิดพลาด ${failedCount}`, failedCount ? 'warning' : 'success');
   }
 
